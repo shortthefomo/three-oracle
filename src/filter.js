@@ -11,6 +11,7 @@ module.exports = class filter extends EventEmitter {
         super()
 
 		const list = {}
+		let trade_stats = ''
 		let running = false
         Object.assign(this, {
             run(interval = 100, time = 5000) {
@@ -36,6 +37,7 @@ module.exports = class filter extends EventEmitter {
 						}
 					}
 				})
+				results['STATS'] = {trade_volume: trade_stats }
 				setTimeout(() => {
 					this.emit('oracle', results)
 					this.run(interval, time)
@@ -133,6 +135,10 @@ module.exports = class filter extends EventEmitter {
 						if (list[data.trade.f] === undefined) { list[data.trade.f] = {} }
                         list[data.trade.f][data.trade.e] = data.trade
                     }
+					if ('stats' in data) {
+						let dollarUSLocale = Intl.NumberFormat('en-US')
+						trade_stats = dollarUSLocale.format(new decimal(data.stats.t.s).toFixed(0))
+					}
                 }
                 socket.on('message', handler)
             },

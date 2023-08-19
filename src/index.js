@@ -50,11 +50,6 @@ class service  {
                     }, 5000)
                     console.log('socket_three trade sockets connected! :)')
                 }
-				socket.onmessage = function(event) { 
-					const data  = JSON.parse(event.data)
-					if (!('stats' in data)) { return }
-					log(data.stats)
-				}
 				socket.onclose = function (event) {
 					// need better reconnect here
 					setTimeout(async () => {
