@@ -1,0 +1,21 @@
+{
+  "name": "three-oracle",
+  "version": "0.0.1",
+  "description": "Three Oracle",
+  "main": "src/index.js",
+  "scripts": {
+    "dev": "DEBUG=apps* nodemon src/index.js",
+    "prod": "DEBUG=apps* nodemon src/index.js"
+  },
+  "author": "Lathan Britz",
+  "license": "MIT",
+  "dependencies": {
+    "debug": "^4.3.3",
+    "decimal.js": "^10.4.3",
+    "dotenv": "^16.3.1",
+    "events": "^3.3.0",
+    "nodemon": "^3.0.1",
+    "stats-analysis": "^2.0.0",
+    "ws": "^8.13.0"
+  }
+}
