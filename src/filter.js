@@ -25,10 +25,7 @@ module.exports = class filter extends EventEmitter {
 					const agg = this.aggregate(value, time)
 					if (agg !== false) { 
 						results[token] = {
-							// token,
 							Price: agg.filteredMean,
-							// AverageUnits: agg.average,
-							// TotalUnits: agg.total,
 							Results: agg.rawExchanges.length,
 							// Exchanges: agg.rawExchanges,
 							LastRecord: agg.lastRecord,
