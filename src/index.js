@@ -16,27 +16,9 @@ class service  {
 				log('runnig')
 				this.connect()
 
-				// const usd = new filter(socket)
-				// usd.loop('USD', 5)
-				// usd.on('USD', (event) => {
-				// 	pairs['USD'] = event
-					
-				// 	if ('direction' in pairs['USDT']) {
-				// 		let t = Math.abs(new decimal(event.price).minus(pairs['USDT'].price))
-				// 		let m = (new decimal(event.price).plus(pairs['USDT'].price)).div('2')
-				// 		let s = decimal.mul(t, '100').div(m)
-
-				// 		const l = {
-				// 			direction: pairs['USDT'].direction,
-				// 			USDT: pairs['USDT'].price,
-				// 			USD: event.price,
-				// 			s: s.toFixed(5)
-				// 		}
-				// 		log(l)
-				// 	}
-				// })
-				
 				const oracle = new filter(socket)
+
+				// adjust the interval and record timeout
 				oracle.run(250, 60000)
 
 				oracle.on('oracle', (event) => {
