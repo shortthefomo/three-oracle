@@ -37,7 +37,7 @@ module.exports = class filter extends EventEmitter {
 						}
 					}
 				})
-				results['STATS'] = {trade_volume: trade_stats }
+				results['STATS'] = {TradeVolume: trade_stats }
 				setTimeout(() => {
 					this.emit('oracle', results)
 					this.run(interval, time)
