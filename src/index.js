@@ -30,7 +30,7 @@ class service  {
 					self.route('oracle', data)
 					let logData = {}
 					Object.entries(data).forEach(([key, value]) => {
-						if (key !== STATS) {
+						if (key !== 'STATS') {
 							logData[key] = {
 								Price: value.Price,
 								Results: value.Results,
