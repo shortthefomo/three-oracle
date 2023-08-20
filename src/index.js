@@ -1,22 +1,27 @@
 'use strict'
 
 const WebSocket = require('ws')
+const WebSocketServer = require('ws').Server
 const decimal = require('decimal.js')
 const dotenv = require('dotenv')
 const debug = require('debug')
 const log = debug('apps:oracle')
 const filter = require('./filter.js')
+
 class service  {
 	constructor() {
+		const wss = new WebSocketServer({ port: process.env.APP_PORT })
+
 		let socket
 		let ping
-		let pairs = {}
+
 		Object.assign(this, {
 		    async run() {
 				log('runnig')
 				this.connect()
 
 				const oracle = new filter(socket)
+				const self = this
 
 				// adjust the interval and record timeout
 				oracle.run(250, 60000)
@@ -29,7 +34,7 @@ class service  {
 					// 	const element = keysSorted[index]
 					// 	list.push({ element: event[element]})
 					// }
-
+					self.route('oracle', event)
 					log(event)
 				})
 			},
@@ -75,6 +80,26 @@ class service  {
                     }, intervalTime)
                 })
             },
+			server() {
+				wss.on('connection', (ws, req) => {
+					ws.on('message', (message) => {
+						//log(message)
+					})
+					ws.on('close', () => {
+						log('client disconnected')
+					})
+					ws.on('error', (error) => {
+						log('SocketServer error')
+						// log(error)
+					})
+				})
+			},
+			route(channel, message) {
+				const string = '{"' + channel +'": ' + JSON.stringify(message) + '}'
+				wss.clients.forEach(function each(client) {
+					client.send(string)
+				})
+			}
 		})
 	}
 }
