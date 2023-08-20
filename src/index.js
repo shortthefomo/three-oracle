@@ -19,7 +19,7 @@ class service  {
 		    async run() {
 				log('runnig')
 				this.connect()
-
+				this.server()
 				const oracle = new filter(socket)
 				const self = this
 
