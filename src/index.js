@@ -26,16 +26,28 @@ class service  {
 				// adjust the interval and record timeout
 				oracle.run(250, 60000)
 
-				oracle.on('oracle', (event) => {
-					// const keysSorted = Object.keys(event).sort((a, b) => (a.Price > b.Price) ? 1 : -1)
-					
-					// let list = []
-					// for (let index = 0; index < keysSorted.length; index++) {
-					// 	const element = keysSorted[index]
-					// 	list.push({ element: event[element]})
-					// }
-					self.route('oracle', event)
-					log(event)
+				oracle.on('oracle', (data) => {
+					self.route('oracle', data)
+					let list = []
+					let logData = {}
+					Object.entries(data).forEach(([key, value]) => {
+						if (key !== 'STATS') {
+							list.push(value)
+							logData[key] = {
+								Price: value.Price,
+								Results: value.Results,
+								LastRecord: value.LastRecord,
+							}
+						}
+                    })
+					list = this.sortData(list)
+					logData.STATS = data.STATS
+					log(logData)
+				})
+			},
+			sortData(data) {
+				return data.sort(function(a, b) {
+					return a.token > b.token
 				})
 			},
 			connect() {

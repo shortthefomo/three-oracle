@@ -22,18 +22,18 @@ module.exports = class filter extends EventEmitter {
 					running = true
 				}
 
-				Object.entries(list).forEach(([token, value]) => {					
+				Object.entries(list).forEach(([token, value]) => {
 					const agg = this.aggregate(value, time)
 					if (agg !== false) { 
 						results[token] = {
+							Token: token,
 							Price: agg.filteredMean,
 							Results: agg.rawExchanges.length,
-							// Exchanges: agg.rawExchanges,
+							Exchanges: agg.rawExchanges,
 							LastRecord: agg.lastRecord,
-							// RawResults: agg.rawResults,
+							RawResults: agg.rawResults,
 							// RawData: agg.rawData,
-							// Timestamp: agg.timestamp
-							// FirstRecord: agg.firstRecord							
+							Timestamp: agg.timestamp
 						}
 					}
 				})
