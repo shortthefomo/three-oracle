@@ -27,7 +27,7 @@ class service  {
 				oracle.run(250, 60000)
 
 				oracle.on('oracle', (data) => {
-					self.route('oracle', data)
+					
 					let list = []
 					let logData = {}
 					Object.entries(data).forEach(([key, value]) => {
@@ -41,6 +41,7 @@ class service  {
 						}
                     })
 					list = this.sortData(list)
+					self.route('oracle', list)
 					logData.STATS = data.STATS
 					log(logData)
 				})
