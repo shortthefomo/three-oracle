@@ -38,6 +38,7 @@ class service  {
 							}
 						}
                     })
+					logData['STATS'] = data['STATS']
 					log(logData)
 				})
 			},
