@@ -27,12 +27,10 @@ class service  {
 				oracle.run(250, 60000)
 
 				oracle.on('oracle', (data) => {
-					
-					let list = []
+					self.route('oracle', data)
 					let logData = {}
 					Object.entries(data).forEach(([key, value]) => {
-						if (key !== 'STATS') {
-							list.push(value)
+						if (key !== STATS) {
 							logData[key] = {
 								Price: value.Price,
 								Results: value.Results,
@@ -40,15 +38,7 @@ class service  {
 							}
 						}
                     })
-					list = this.sortData(list)
-					self.route('oracle', list)
-					logData.STATS = data.STATS
 					log(logData)
-				})
-			},
-			sortData(data) {
-				return data.sort(function(a, b) {
-					return a.token > b.token
 				})
 			},
 			connect() {
