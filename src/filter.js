@@ -31,7 +31,7 @@ module.exports = class filter extends EventEmitter {
 							Results: agg.rawExchanges.length,
 							Exchanges: agg.rawExchanges,
 							LastRecord: agg.lastRecord,
-							RawResults: agg.rawResults,
+							RawResults: agg.rawTimeFiltered,
 							// RawData: agg.rawData,
 							Timestamp: agg.timestamp
 						}
@@ -95,7 +95,7 @@ module.exports = class filter extends EventEmitter {
 				return {
 					...raw,
 					...filtered,
-					// rawExchanges,
+					rawExchanges,
 					rawTimeFiltered,
                     average: new decimal(avg).toFixed(4)*1,
                     total: new decimal(sum).toFixed(4)*1,
