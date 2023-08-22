@@ -31,7 +31,7 @@ module.exports = class filter extends EventEmitter {
 							Results: agg.rawExchanges.length,
 							Exchanges: agg.rawExchanges,
 							LastRecord: agg.lastRecord,
-							RawResults: agg.timeFiltered,
+							RawResults: agg.rawFiltered,
 							// RawData: agg.rawData,
 							Timestamp: agg.timestamp
 						}
@@ -47,8 +47,10 @@ module.exports = class filter extends EventEmitter {
 				//log('results', Object.values(results))
 				if (results === undefined) { return false }
 				const timeFiltered = Object.values(results).filter((item) => item.t > Date.now() - time)
-				// log('timeFiltered', timeFiltered)
-				const rawExchanges =  Object.values(timeFiltered).map((item) => { 
+				const rawFiltered = Object.values(timeFiltered).map((item) => { 
+                    return {exchange: item.e, price: item.p}
+                })
+				const rawExchanges = Object.values(timeFiltered).map((item) => { 
                     return item.e
                 })
 				const rawResults = Object.values(timeFiltered).map((item) => { 
@@ -96,7 +98,7 @@ module.exports = class filter extends EventEmitter {
 					...raw,
 					...filtered,
 					rawExchanges,
-					timeFiltered,
+					rawFiltered,
                     average: new decimal(avg).toFixed(4)*1,
                     total: new decimal(sum).toFixed(4)*1,
 					timestamp: lastRecord,
