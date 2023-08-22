@@ -29,7 +29,7 @@ module.exports = class filter extends EventEmitter {
 							Token: token,
 							Price: agg.filteredMean,
 							Results: agg.rawExchanges.length,
-							Exchanges: agg.rawExchanges,
+							//Exchanges: agg.rawExchanges,
 							LastRecord: agg.lastRecord,
 							RawResults: agg.rawFiltered,
 							// RawData: agg.rawData,
