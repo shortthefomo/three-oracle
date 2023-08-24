@@ -61,8 +61,8 @@ class service  {
                 }
 				socket.onclose = function (event) {
 					// need better reconnect here
-					setTimeout(async () => {
-						await self.waitForOpenConnection(socket)
+					setTimeout(() => {
+						self.connect()
 					}, 10000)
 				}
 			},
