@@ -14,13 +14,14 @@ class service  {
 
 		let socket
 		let ping
+		let oracle
 
 		Object.assign(this, {
 		    async run() {
 				log('runnig')
 				this.connect()
 				this.server()
-				const oracle = new filter(socket)
+				oracle = new filter(socket)
 				const self = this
 
 				// adjust the interval and record timeout
@@ -62,6 +63,9 @@ class service  {
 				socket.onclose = function (event) {
 					// need better reconnect here
 					setTimeout(() => {
+						if ( oracle !== undefined) {
+							oracle.reset()
+						}
 						self.connect()
 					}, 10000)
 				}
