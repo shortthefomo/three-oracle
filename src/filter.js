@@ -138,7 +138,7 @@ module.exports = class filter extends EventEmitter {
 						if (list[data.trade.f] === undefined) { list[data.trade.f] = {} }
                         list[data.trade.f][data.trade.e] = data.trade
                     }
-					if ('others' in data  && data.trade.s === 'socket') {
+					if ('others' in data  && data.others.s === 'socket') {
 						if (list[data.others.f] === undefined) { list[data.others.f] = {} }
                         list[data.others.f][data.others.e] = data.others
                     }
