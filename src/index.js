@@ -40,21 +40,12 @@ class service  {
 						}
                     })
 					logData['STATS'] = data['STATS']
-					log(logData)
+					// log(logData)
 				})
 
 				oracle.on('dex', (data) => {
 					self.route('dex', data)
-					// let logData = {}
-					// Object.entries(data).forEach(([key, value]) => {
-					// 	logData[key] = {
-					// 		Price: value.Price,
-					// 		Results: value.Results,
-					// 		LastRecord: value.LastRecord,
-					// 		Issuer: value.Issuer,
-					// 	}
-                    // })
-					log(data)
+					// log(data)
 				})
 			},
 			connect() {
