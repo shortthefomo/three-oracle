@@ -35,12 +35,26 @@ class service  {
 							logData[key] = {
 								Price: value.Price,
 								Results: value.Results,
-								LastRecord: value.LastRecord,
+								LastRecord: value.LastRecord
 							}
 						}
                     })
 					logData['STATS'] = data['STATS']
 					log(logData)
+				})
+
+				oracle.on('dex', (data) => {
+					self.route('dex', data)
+					// let logData = {}
+					// Object.entries(data).forEach(([key, value]) => {
+					// 	logData[key] = {
+					// 		Price: value.Price,
+					// 		Results: value.Results,
+					// 		LastRecord: value.LastRecord,
+					// 		Issuer: value.Issuer,
+					// 	}
+                    // })
+					// log(data)
 				})
 			},
 			connect() {
@@ -107,7 +121,7 @@ class service  {
 				wss.clients.forEach(function each(client) {
 					client.send(string)
 				})
-			}
+			},
 		})
 	}
 }

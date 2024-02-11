@@ -1,6 +1,7 @@
 'use strict'
 
 const EventEmitter = require('events')
+const { XrplClient } = require('xrpl-client')
 const stats = require('stats-analysis')
 const decimal = require('decimal.js')
 const debug = require('debug')
@@ -10,22 +11,28 @@ module.exports = class filter extends EventEmitter {
     constructor(socket) {
         super()
 
-		const list = {}
+		const cex = {}
+		const dex = {}
+		const xrpl = new XrplClient(['wss://node.panicbot.xyz', 'wss://xrplcluster.com', 'wss://xrpl.link', 'wss://s2.ripple.com'])
 		let trade_stats = ''
 		let running = false
+		
+
         Object.assign(this, {
             run(interval = 100, time = 5000) {
-				const results = {}
+				const cex_results = {}
+				const dex_results = {}
 				if (!running)  {
 					log('starting to listen for price')
 					this.trades()
+					this.pathing()
 					running = true
 				}
 
-				Object.entries(list).forEach(([token, value]) => {
+				Object.entries(cex).forEach(([token, value]) => {
 					const agg = this.aggregate(value, time)
 					if (agg !== false) { 
-						results[token] = {
+						cex_results[token] = {
 							Token: token,
 							Price: agg.filteredMean,
 							Results: agg.rawExchanges.length,
@@ -37,9 +44,11 @@ module.exports = class filter extends EventEmitter {
 						}
 					}
 				})
-				results['STATS'] = {TradeVolume: trade_stats }
+				cex_results['STATS'] = {TradeVolume: trade_stats }
+				
 				setTimeout(() => {
-					this.emit('oracle', results)
+					this.emit('oracle', cex_results)
+					this.emit('dex', dex)
 					this.run(interval, time)
 				}, interval)
 			},
@@ -131,16 +140,16 @@ module.exports = class filter extends EventEmitter {
                     const data  = JSON.parse(string)
 					
                     if ('stable' in data  && data.stable.s === 'socket') {
-						if (list[data.stable.f] === undefined) { list[data.stable.f] = {} }
-                        list[data.stable.f][data.stable.e] = data.stable
+						if (cex[data.stable.f] === undefined) { cex[data.stable.f] = {} }
+                        cex[data.stable.f][data.stable.e] = data.stable
                     }
                     if ('trade' in data  && data.trade.s === 'socket') {
-						if (list[data.trade.f] === undefined) { list[data.trade.f] = {} }
-                        list[data.trade.f][data.trade.e] = data.trade
+						if (cex[data.trade.f] === undefined) { cex[data.trade.f] = {} }
+                        cex[data.trade.f][data.trade.e] = data.trade
                     }
 					if ('others' in data  && data.others.s === 'socket') {
-						if (list[data.others.f] === undefined) { list[data.others.f] = {} }
-                        list[data.others.f][data.others.e] = data.others
+						if (cex[data.others.f] === undefined) { cex[data.others.f] = {} }
+                        cex[data.others.f][data.others.e] = data.others
                     }
 					if ('stats' in data) {
 						let dollarUSLocale = Intl.NumberFormat('en-US')
@@ -149,6 +158,66 @@ module.exports = class filter extends EventEmitter {
                 }
                 socket.on('message', handler)
             },
+			async pathing(key = 'test') {
+				const self = this
+                const cmd = {
+                    id: key,
+                    command: 'path_find',
+                    subcommand: 'create',
+                    source_account: 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8',
+                    destination_account: 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8',
+                    destination_amount: '1000000' //  1 XRP
+                }
+                const result = await xrpl.send(cmd)
+				const currencies = ['XAH', 'EUR', 'USD', 'USDT', 'USDC']
+                // console.log('path init', result)
+                xrpl.on('path', (path) => {
+                    if ('error' in path) { return }
+                    // console.log('path', path.alternatives)
+					for (let index = 0; index < path.alternatives.length; index++) {
+						const element = path.alternatives[index]
+						const currency = this.currencyHexToUTF8(element.source_amount.currency)
+						if (!currencies.includes(currency)) { continue }
+						element.paths_computed.forEach(item => {
+							// log(item)
+							if ('account' in item[0]) {
+								if (dex[currency] === undefined) { dex[currency] = {} }
+								dex[currency][item[0].account] = {
+									Token: currency,
+									Issuer: item[0].account,
+									Price: element.source_amount.value,
+									Timestamp: Date.now(),
+								}
+								// log(dex)
+							}
+						})
+						// log(element)
+						// log(element.paths_computed)
+					}
+                })
+            },
+			currencyHexToUTF8(code) {
+				if (code.length === 3)
+					return code
+
+				let decoded = new TextDecoder()
+					.decode(this.hexToBytes(code))
+				let padNull = decoded.length
+
+				while (decoded.charAt(padNull - 1) === '\0')
+					padNull--
+
+				return decoded.slice(0, padNull)
+			},
+            hexToBytes(hex) {
+				let bytes = new Uint8Array(hex.length / 2)
+
+				for (let i = 0; i !== bytes.length; i++) {
+					bytes[i] = parseInt(hex.substr(i * 2, 2), 16)
+				}
+
+				return bytes
+			},
         })
     }
 }
