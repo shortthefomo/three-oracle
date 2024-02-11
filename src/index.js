@@ -54,7 +54,7 @@ class service  {
 					// 		Issuer: value.Issuer,
 					// 	}
                     // })
-					// log(data)
+					log(data)
 				})
 			},
 			connect() {

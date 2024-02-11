@@ -21,7 +21,7 @@ module.exports = class filter extends EventEmitter {
         Object.assign(this, {
             run(interval = 100, time = 5000) {
 				const cex_results = {}
-				const dex_results = {}
+
 				if (!running)  {
 					log('starting to listen for price')
 					this.trades()
@@ -159,6 +159,7 @@ module.exports = class filter extends EventEmitter {
                 socket.on('message', handler)
             },
 			async pathing(key = 'test') {
+				let lastUpdate = Date.now()
 				const self = this
                 const cmd = {
                     id: key,
@@ -194,7 +195,12 @@ module.exports = class filter extends EventEmitter {
 						// log(element)
 						// log(element.paths_computed)
 					}
+					lastUpdate = Date.now()
                 })
+				if (Date.now() - lastUpdate > 180000) {
+					log('retstarting pathing..')
+					this.pathing()
+				}
             },
 			currencyHexToUTF8(code) {
 				if (code.length === 3)
