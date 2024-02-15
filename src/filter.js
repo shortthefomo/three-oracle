@@ -197,10 +197,12 @@ module.exports = class filter extends EventEmitter {
 					}
 					lastUpdate = Date.now()
                 })
-				if (Date.now() - lastUpdate > 180000) {
-					log('retstarting pathing..')
-					this.pathing()
-				}
+				setInterval(() => {
+					if (Date.now() - lastUpdate > 180000) {
+						log('retstarting pathing..')
+						self.pathing()
+					}
+				}, 4000)
             },
 			currencyHexToUTF8(code) {
 				if (code.length === 3)
