@@ -13,7 +13,6 @@ module.exports = class filter extends EventEmitter {
 
 		const cex = {}
 		const dex = {}
-		const xrpl = new XrplClient(['wss://node.panicbot.xyz', 'wss://xrplcluster.com', 'wss://xrpl.link', 'wss://s2.ripple.com'])
 		let trade_stats = ''
 		let running = false
 		
@@ -158,7 +157,8 @@ module.exports = class filter extends EventEmitter {
                 }
                 socket.on('message', handler)
             },
-			async pathing(key = 'test') {
+			async pathing(key = 'threepath') {
+				const xrpl = new XrplClient(['wss://node.panicbot.xyz', 'wss://xrplcluster.com', 'wss://s2.ripple.com'])
 				let lastUpdate = Date.now()
 				const self = this
                 const cmd = {
@@ -180,7 +180,6 @@ module.exports = class filter extends EventEmitter {
 						const currency = this.currencyHexToUTF8(element.source_amount.currency)
 						if (!currencies.includes(currency)) { continue }
 						element.paths_computed.forEach(item => {
-							// log(item)
 							if ('account' in item[0]) {
 								if (dex[currency] === undefined) { dex[currency] = {} }
 								dex[currency][item[0].account] = {
@@ -189,18 +188,17 @@ module.exports = class filter extends EventEmitter {
 									Price: element.source_amount.value,
 									Timestamp: Date.now(),
 								}
-								// log(dex)
 							}
 						})
-						// log(element)
-						// log(element.paths_computed)
 					}
 					lastUpdate = Date.now()
                 })
-				setInterval(() => {
+				const interval = setInterval(() => {
 					if (Date.now() - lastUpdate > 180000) {
 						log('retstarting pathing..')
+						xrpl.close()
 						self.pathing()
+						clearInterval(interval)
 					}
 				}, 4000)
             },
