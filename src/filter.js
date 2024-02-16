@@ -200,7 +200,7 @@ module.exports = class filter extends EventEmitter {
 						self.pathing()
 						clearInterval(interval)
 					}
-				}, 4000)
+				}, 10000)
             },
 			currencyHexToUTF8(code) {
 				if (code.length === 3)
