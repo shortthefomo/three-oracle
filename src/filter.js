@@ -15,7 +15,7 @@ module.exports = class filter extends EventEmitter {
 		const dex = {}
 		let trade_stats = ''
 		let running = false
-		
+		let pathing_interval = undefined
 
         Object.assign(this, {
             run(interval = 100, time = 5000) {
@@ -158,6 +158,10 @@ module.exports = class filter extends EventEmitter {
                 socket.on('message', handler)
             },
 			async pathing(key = 'threepath') {
+				if (pathing_interval !== undefined) {
+					clearInterval(pathing_interval)
+					pathing_interval = undefined
+				}
 				const xrpl = new XrplClient(['wss://node.panicbot.xyz', 'wss://xrplcluster.com', 'wss://s2.ripple.com'])
 				let lastUpdate = Date.now()
 				const self = this
@@ -193,12 +197,11 @@ module.exports = class filter extends EventEmitter {
 					}
 					lastUpdate = Date.now()
                 })
-				const interval = setInterval(() => {
+				pathing_interval = setInterval(() => {
 					if (Date.now() - lastUpdate > 180000) {
 						log('retstarting pathing..')
 						xrpl.close()
 						self.pathing()
-						clearInterval(interval)
 					}
 				}, 10000)
             },
