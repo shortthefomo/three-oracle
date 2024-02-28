@@ -162,7 +162,7 @@ module.exports = class filter extends EventEmitter {
 					clearInterval(pathing_interval)
 					pathing_interval = undefined
 				}
-				const xrpl = new XrplClient(['wss://node.panicbot.xyz', 'wss://xrplcluster.com', 'wss://s2.ripple.com'])
+				const xrpl = new XrplClient(['ws://localhost', 'wss://xrplcluster.com', 'wss://s2.ripple.com'])
 				let lastUpdate = Date.now()
 				const self = this
                 const cmd = {
