@@ -25,6 +25,7 @@ module.exports = class filter extends EventEmitter {
 					log('starting to listen for price')
 					this.trades()
 					this.pathing()
+					this.pathEmit()
 					running = true
 				}
 
@@ -201,10 +202,16 @@ module.exports = class filter extends EventEmitter {
 					if (Date.now() - lastUpdate > 180000) {
 						log('retstarting pathing..')
 						xrpl.close()
-						self.pathing()
+						self.emit('path')
 					}
 				}, 10000)
             },
+			pathEmit() {
+				const self = this
+				this.addListener('path', function() {
+					self.pathing()
+				})
+			},
 			currencyHexToUTF8(code) {
 				if (code.length === 3)
 					return code
