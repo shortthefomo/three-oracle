@@ -175,7 +175,7 @@ module.exports = class filter extends EventEmitter {
                     destination_amount: '1000000' //  1 XRP
                 }
                 const result = await xrpl.send(cmd)
-				const currencies = ['XAH', 'EUR', 'USD', 'USDT', 'USDC']
+				const currencies = ['XAH', 'EUR', 'USD', 'USDT', 'USDC', 'CSC']
                 // console.log('path init', result)
                 xrpl.on('path', (path) => {
                     if ('error' in path) { return }
