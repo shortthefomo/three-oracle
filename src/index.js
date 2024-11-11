@@ -200,11 +200,11 @@ class service  {
 							}
 							data[element.target] = {
 								Token: element.target,
-								Price: element.rate * (1/ Price),
+								Price: new decimal(element.rate * (1/ Price)).toFixed(10) * 1,
 								Results: 1,
 								RawResults: [{
 									exchange: 'XRPL', 
-									price: element.rate * (1/Price)
+									price: new decimal(element.rate * (1/ Price)).toFixed(10) * 1
 								}],
 								Timestamp: new Date().getTime()
 							}
