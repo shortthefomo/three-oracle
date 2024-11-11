@@ -18,6 +18,6 @@
     "nodemon": "^3.0.1",
     "stats-analysis": "^2.0.0",
     "ws": "^8.13.0",
-    "xrpl-client": "^2.3.1"
+    "xrpl-client": "^2.4.0"
   }
 }

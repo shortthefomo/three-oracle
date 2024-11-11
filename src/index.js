@@ -1,5 +1,6 @@
 'use strict'
 
+const { XrplClient } = require('xrpl-client')
 const WebSocket = require('ws')
 const WebSocketServer = require('ws').Server
 const decimal = require('decimal.js')
@@ -11,15 +12,21 @@ const filter = require('./filter.js')
 class service  {
 	constructor() {
 		const wss = new WebSocketServer({ port: process.env.APP_PORT })
+		const ClientConnection = 'wss://slashdog.panicbot.xyz'
 
 		let socket
+		let socketFX
 		let ping
 		let oracle
+		let memes = {}
+		let fx
 
 		Object.assign(this, {
 		    async run() {
 				log('runnig')
+				this.pathATM()
 				this.connect()
+				this.forex()
 				this.server()
 				oracle = new filter(socket)
 				const self = this
@@ -29,6 +36,7 @@ class service  {
 
 				oracle.on('oracle', (data) => {
 					self.route('oracle', data)
+					//log(data)
 					let logData = {}
 					Object.entries(data).forEach(([key, value]) => {
 						if (key !== 'STATS') {
@@ -113,6 +121,98 @@ class service  {
 					client.send(string)
 				})
 			},
+			async pathATM() {
+				const account = 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8' // USE THE AMM POOL ADDRESS
+				const key = 'ATM'
+
+				const xrpl = new XrplClient([ClientConnection], { tryAllNodes: false })
+				await xrpl.ready()
+
+				const command = {
+					command: 'path_find',
+					id: '99-NoRipple-' + key,
+					destination_account: account,
+					send_max: { value: '1', currency: 'USD', issuer: 'rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B' },
+					destination_amount: { value: '-1', currency: 'ATM', issuer: 'raDZ4t8WPXkmDfJWMLBcNZmmSHmBC523NZ' },
+					source_account: account,
+					// flags: 65536,
+					subcommand: 'create'
+				}
+				// console.log(command)
+				const path_result = await xrpl.send(command)
+				// console.log('NoRippleDirect path_result', path_result)
+				path_result.result.time = new Date().getTime()
+				// memes[key] = path_result.result
+				const self = this
+				xrpl.on('path', async (path) => {
+					if ('error' in path) { return }
+
+					if ('alternatives' in path && self.fx !== undefined) {
+						path.time = new Date().getTime()
+						const Price = path.alternatives[0].destination_amount.value
+						const data = {}
+						data['USD'] = {
+							Token: 'USD',
+							Price: 1 / Price,
+							Results: 1,
+							RawResults: [{
+								exchange: 'XRPL', 
+								price: Price
+							}],
+							Timestamp: new Date().getTime()
+						}
+
+						for (let index = 0; index < self.fx.length; index++) {
+							const element = self.fx[index]
+							if (element.target !== 'EUR' || element.target !== 'JPY' || element.target !== 'GBP' || element.target !== 'CHF'
+								|| element.target !== 'CAD' || element.target !== 'AUD' || element.target !== 'CNY' ) {
+									continue
+							}
+							data[element.target] = {
+								Token: element.target,
+								Price: element.rate * (1/ Price),
+								Results: 1,
+								RawResults: [{
+									exchange: 'XRPL', 
+									price: element.rate * (1/Price)
+								}],
+								Timestamp: new Date().getTime()
+							}
+						}
+						
+						log(data)
+						// log(memes[key])
+						self.route('oracle-'+key, data)
+					}
+				})
+
+				const hhhmmmm = async () => {
+					console.log('upstream connection closed NoRippleDirect ' + key)
+					memes[key] = undefined
+				}
+				xrpl.on('close', hhhmmmm)
+				xrpl.on('error', (error) => {
+					console.log('error pathing NoRippleDirect ' + key, error)
+					memes[key] = undefined
+				})
+			},
+			forex() {
+				const self = this
+				socketFX = new WebSocket('wss://three-forex.panicbot.xyz')
+				socketFX.onmessage = function (message) {
+					const data = JSON.parse(message.data)
+					if ('rates' in data) {
+						self.fx = data.rates
+						// log(data.rates)
+					}
+				}
+				socket.onclose = function (event) {
+					// need better reconnect here
+					setTimeout(() => {
+						self.forex()
+					}, 10000)
+				}
+			}
 		})
 	}
 }

@@ -172,14 +172,19 @@ module.exports = class filter extends EventEmitter {
                     subcommand: 'create',
                     source_account: 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8',
                     destination_account: 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8',
-                    destination_amount: '1000000' //  1 XRP
+                    destination_amount: {
+						'value': 1,
+						'currency': 'XAH',
+						'issuer': 'rswh1fvyLqHizBS2awu1vs6QcmwTBd9qiv'
+					}
+					//'1000000' //  1 XRP
                 }
                 const result = await xrpl.send(cmd)
-				const currencies = ['XAH', 'EUR', 'USD', 'USDT', 'USDC', 'CSC']
+				const currencies = ['CSC']
                 // console.log('path init', result)
                 xrpl.on('path', (path) => {
                     if ('error' in path) { return }
-                    // console.log('path', path.alternatives)
+                    console.log('path', path.alternatives)
 					for (let index = 0; index < path.alternatives.length; index++) {
 						const element = path.alternatives[index]
 						const currency = this.currencyHexToUTF8(element.source_amount.currency)
