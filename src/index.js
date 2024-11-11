@@ -180,7 +180,7 @@ class service  {
 							}
 						}
 						
-						log(data)
+						// log(data)
 						// log(memes[key])
 						self.route('oracle-'+key, data)
 					}
