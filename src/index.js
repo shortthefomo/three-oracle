@@ -164,8 +164,8 @@ class service  {
 
 						for (let index = 0; index < self.fx.length; index++) {
 							const element = self.fx[index]
-							if (element.target !== 'EUR' || element.target !== 'JPY' || element.target !== 'GBP' || element.target !== 'CHF'
-								|| element.target !== 'CAD' || element.target !== 'AUD' || element.target !== 'CNY' ) {
+							if (element.target !== 'EUR' && element.target !== 'JPY' && element.target !== 'GBP' && element.target !== 'CHF'
+								&& element.target !== 'CAD' && element.target !== 'AUD' && element.target !== 'CNY' ) {
 									continue
 							}
 							data[element.target] = {
