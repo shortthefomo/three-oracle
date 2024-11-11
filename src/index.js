@@ -1,5 +1,6 @@
 'use strict'
 
+const axios = require('axios')
 const { XrplClient } = require('xrpl-client')
 const WebSocket = require('ws')
 const WebSocketServer = require('ws').Server
@@ -36,7 +37,7 @@ class service  {
 
 				oracle.on('oracle', (data) => {
 					self.route('oracle', data)
-					//log(data)
+					// log(data)
 					let logData = {}
 					Object.entries(data).forEach(([key, value]) => {
 						if (key !== 'STATS') {
@@ -144,6 +145,9 @@ class service  {
 				path_result.result.time = new Date().getTime()
 				// memes[key] = path_result.result
 				const self = this
+
+				let atm_filter = new filter()
+				
 				xrpl.on('path', async (path) => {
 					if ('error' in path) { return }
 
@@ -151,16 +155,42 @@ class service  {
 						path.time = new Date().getTime()
 						const Price = path.alternatives[0].destination_amount.value
 						const data = {}
+
+						const values = [{
+							p: new decimal(1 / Price).toFixed(10) * 1,
+							e: 'XRPL',
+							t: new Date().getTime(),
+							s: 'socket'
+						}]
+
+						let bitrue 
+						try {
+							bitrue = await axios.get('https://openapi.bitrue.com/api/v1/ticker/bookTicker?symbol=ATMXUSDT')
+							values.push({
+								p: bitrue.data?.bidPrice * 1,
+								e: 'bitrue',
+								t: new Date().getTime(),
+								s: 'rest'
+							})
+						} catch(e) {
+							// do nothing
+						}
+
+						const agg = atm_filter.aggregate(values, 5000)
+
+
 						data['USD'] = {
 							Token: 'USD',
-							Price: 1 / Price,
-							Results: 1,
-							RawResults: [{
-								exchange: 'XRPL', 
-								price: Price
-							}],
-							Timestamp: new Date().getTime()
+							Price: agg.filteredMean,
+							Results: agg.rawExchanges.length,
+							//Exchanges: agg.rawExchanges,
+							LastRecord: agg.lastRecord,
+							RawResults: agg.rawFiltered,
+							// RawData: agg.rawData,
+							Timestamp: agg.timestamp
 						}
+
+						// log(data['USD'])
 
 						for (let index = 0; index < self.fx.length; index++) {
 							const element = self.fx[index]

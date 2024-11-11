@@ -8,7 +8,7 @@ const debug = require('debug')
 const log = debug('apps:filter')
 
 module.exports = class filter extends EventEmitter {
-    constructor(socket) {
+    constructor(socket, def = true) {
         super()
 
 		const cex = {}
@@ -19,6 +19,7 @@ module.exports = class filter extends EventEmitter {
 
         Object.assign(this, {
             run(interval = 100, time = 5000) {
+				if (!def) { return }
 				const cex_results = {}
 
 				if (!running)  {
