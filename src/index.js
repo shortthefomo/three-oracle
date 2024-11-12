@@ -151,68 +151,72 @@ class service  {
 				xrpl.on('path', async (path) => {
 					if ('error' in path) { return }
 
-					if ('alternatives' in path && self.fx !== undefined) {
-						path.time = new Date().getTime()
-						const Price = path.alternatives[0].destination_amount.value
-						const data = {}
-
-						const values = [{
-							p: new decimal(1 / Price).toFixed(10) * 1,
-							e: 'XRPL',
-							t: new Date().getTime(),
-							s: 'socket'
-						}]
-
-						let bitrue 
-						try {
-							bitrue = await axios.get('https://openapi.bitrue.com/api/v1/ticker/bookTicker?symbol=ATMXUSDT')
-							values.push({
-								p: bitrue.data?.bidPrice * 1,
-								e: 'bitrue',
+					try {
+						if ('alternatives' in path && self.fx !== undefined) {
+							path.time = new Date().getTime()
+							const Price = path.alternatives[0].destination_amount.value
+							const data = {}
+	
+							const values = [{
+								p: new decimal(1 / Price).toFixed(10) * 1,
+								e: 'XRPL',
 								t: new Date().getTime(),
-								s: 'rest'
-							})
-						} catch(e) {
-							// do nothing
-						}
-
-						const agg = atm_filter.aggregate(values, 5000)
-
-
-						data['USD'] = {
-							Token: 'USD',
-							Price: agg.filteredMean,
-							Results: agg.rawExchanges.length,
-							//Exchanges: agg.rawExchanges,
-							LastRecord: agg.lastRecord,
-							RawResults: agg.rawFiltered,
-							// RawData: agg.rawData,
-							Timestamp: agg.timestamp
-						}
-
-						// log(data['USD'])
-
-						for (let index = 0; index < self.fx.length; index++) {
-							const element = self.fx[index]
-							if (element.target !== 'EUR' && element.target !== 'JPY' && element.target !== 'GBP' && element.target !== 'CHF'
-								&& element.target !== 'CAD' && element.target !== 'AUD' && element.target !== 'CNY' ) {
-									continue
+								s: 'socket'
+							}]
+	
+							let bitrue 
+							try {
+								bitrue = await axios.get('https://openapi.bitrue.com/api/v1/ticker/bookTicker?symbol=ATMXUSDT')
+								values.push({
+									p: bitrue.data?.bidPrice * 1,
+									e: 'bitrue',
+									t: new Date().getTime(),
+									s: 'rest'
+								})
+							} catch(e) {
+								// do nothing
 							}
-							data[element.target] = {
-								Token: element.target,
-								Price: new decimal(element.rate * (1/ Price)).toFixed(10) * 1,
-								Results: 1,
-								RawResults: [{
-									exchange: 'XRPL', 
-									price: new decimal(element.rate * (1/ Price)).toFixed(10) * 1
-								}],
-								Timestamp: new Date().getTime()
+	
+							const agg = atm_filter.aggregate(values, 5000)
+	
+	
+							data['USD'] = {
+								Token: 'USD',
+								Price: agg.filteredMean,
+								Results: agg.rawExchanges.length,
+								//Exchanges: agg.rawExchanges,
+								LastRecord: agg.lastRecord,
+								RawResults: agg.rawFiltered,
+								// RawData: agg.rawData,
+								Timestamp: agg.timestamp
 							}
+	
+							// log(data['USD'])
+	
+							for (let index = 0; index < self.fx.length; index++) {
+								const element = self.fx[index]
+								if (element.target !== 'EUR' && element.target !== 'JPY' && element.target !== 'GBP' && element.target !== 'CHF'
+									&& element.target !== 'CAD' && element.target !== 'AUD' && element.target !== 'CNY' ) {
+										continue
+								}
+								data[element.target] = {
+									Token: element.target,
+									Price: new decimal(element.rate * (1/ Price)).toFixed(10) * 1,
+									Results: 1,
+									RawResults: [{
+										exchange: 'XRPL', 
+										price: new decimal(element.rate * (1/ Price)).toFixed(10) * 1
+									}],
+									Timestamp: new Date().getTime()
+								}
+							}
+							
+							// log(data)
+							// log(memes[key])
+							self.route('oracle-'+key, data)
 						}
-						
-						// log(data)
-						// log(memes[key])
-						self.route('oracle-'+key, data)
+					} catch(e) {
+						log('error', e)
 					}
 				})
 
