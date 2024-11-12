@@ -62,7 +62,7 @@ class service  {
                     clearInterval(ping)
                 }
 				const self = this
-				socket = new WebSocket('ws://three-dev.panicbot.xyz:3131')
+				socket = new WebSocket(process.env.APP_SOCKET)
 				socket.onopen = async function (message) {
                     await self.waitForOpenConnection(socket)
                     socket.send(JSON.stringify({
@@ -76,6 +76,7 @@ class service  {
                 }
 				socket.onclose = function (event) {
 					// need better reconnect here
+					console.log('socket closed', event)
 					setTimeout(() => {
 						if ( oracle !== undefined) {
 							oracle.reset()
