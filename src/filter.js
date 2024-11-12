@@ -25,8 +25,8 @@ module.exports = class filter extends EventEmitter {
 				if (!running)  {
 					log('starting to listen for price')
 					this.trades()
-					this.pathing()
-					this.pathEmit()
+					// this.pathing()
+					// this.pathEmit()
 					running = true
 				}
 
