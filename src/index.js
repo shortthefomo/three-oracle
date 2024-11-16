@@ -13,6 +13,7 @@ const filter = require('./filter.js')
 class service  {
 	constructor() {
 		const wss = new WebSocketServer({ port: process.env.APP_PORT })
+		const wss_admin = new WebSocketServer({ port: process.env.APP_ADMIN_PORT })
 		const ClientConnection = 'wss://slashdog.panicbot.xyz'
 
 		let socket
@@ -116,10 +117,26 @@ class service  {
 						// log(error)
 					})
 				})
+
+				wss_admin.on('connection', (ws, req) => {
+					ws.on('admin message', (message) => {
+						//log(message)
+					})
+					ws.on('close', () => {
+						log('admin client disconnected')
+					})
+					ws.on('error', (error) => {
+						log('admin SocketServer error')
+						// log(error)
+					})
+				})
 			},
 			route(channel, message) {
 				const string = '{"' + channel +'": ' + JSON.stringify(message) + '}'
 				wss.clients.forEach(function each(client) {
+					client.send(string)
+				})
+				wss_admin.clients.forEach(function each(client) {
 					client.send(string)
 				})
 			},
