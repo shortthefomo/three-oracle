@@ -307,7 +307,7 @@ class service  {
 							try {
 								const bitmart = await axios.get('https://api-cloud.bitmart.com/spot/quotation/v3/ticker?symbol=EVR_USDT')
 								values.push({
-									p: bitrue.data?.bid_px * 1,
+									p: bitmart.data?.bid_px * 1,
 									e: 'bitmart',
 									t: new Date().getTime(),
 									s: 'rest'
