@@ -291,13 +291,36 @@ class service  {
 								t: new Date().getTime(),
 								s: 'socket'
 							}]
-	
-							let bitrue 
+	 
 							try {
-								bitrue = await axios.get('https://openapi.bitrue.com/api/v1/ticker/bookTicker?symbol=EVRUSDT')
+								const bitrue = await axios.get('https://openapi.bitrue.com/api/v1/ticker/bookTicker?symbol=EVRUSDT')
 								values.push({
 									p: bitrue.data?.bidPrice * 1,
 									e: 'bitrue',
+									t: new Date().getTime(),
+									s: 'rest'
+								})
+							} catch(e) {
+								// do nothing
+							}
+
+							try {
+								const bitmart = await axios.get('https://api-cloud.bitmart.com/spot/quotation/v3/ticker?symbol=EVR_USDT')
+								values.push({
+									p: bitrue.data?.bid_px * 1,
+									e: 'bitmart',
+									t: new Date().getTime(),
+									s: 'rest'
+								})
+							} catch(e) {
+								// do nothing
+							}
+
+							try {
+								const mexc = await axios.get('https://api.mexc.com/api/v3/ticker/price?symbol=EVRUSDT')
+								values.push({
+									p: mexc.data?.price * 1,
+									e: 'mexc',
 									t: new Date().getTime(),
 									s: 'rest'
 								})
