@@ -143,7 +143,7 @@ class service  {
 				})
 			},
 			async pathXAH() {
-				const account = 'r9zeQhjj3scQFDRriCJpMjDtW6eWjWnp6M' // USE THE AMM POOL ADDRESS
+				const account = 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8' // USE THE AMM POOL ADDRESS
 				const key = 'XAH'
 
 				const xrpl = new XrplClient([ClientConnection], { tryAllNodes: false })
@@ -251,7 +251,7 @@ class service  {
 				})
 			},
 			async pathEVR() {
-				const account = 'r36cEzVdd1rzFMjCf7NdBWHYNREjoNUbsm' // USE THE AMM POOL ADDRESS
+				const account = 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8' // USE THE AMM POOL ADDRESS
 				const key = 'EVR'
 
 				const xrpl = new XrplClient([ClientConnection], { tryAllNodes: false })
@@ -359,7 +359,7 @@ class service  {
 				})
 			},
 			async pathATM() {
-				const account = 'rUDdZsUbxbyCp2WeB2DTRLUpyDs1LUubK9' // USE THE AMM POOL ADDRESS
+				const account = 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8' // USE THE AMM POOL ADDRESS
 				const key = 'ATM'
 
 				const xrpl = new XrplClient([ClientConnection], { tryAllNodes: false })
