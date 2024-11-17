@@ -27,6 +27,8 @@ class service  {
 		    async run() {
 				log('runnig')
 				this.pathATM()
+				this.pathXAH()
+				this.pathEVR()
 				this.connect()
 				this.forex()
 				this.server()
@@ -140,8 +142,224 @@ class service  {
 					client.send(string)
 				})
 			},
+			async pathXAH() {
+				const account = 'r9zeQhjj3scQFDRriCJpMjDtW6eWjWnp6M' // USE THE AMM POOL ADDRESS
+				const key = 'XAH'
+
+				const xrpl = new XrplClient([ClientConnection], { tryAllNodes: false })
+				await xrpl.ready()
+
+				const command = {
+					command: 'path_find',
+					id: '99-NoRipple-' + key,
+					destination_account: account,
+					send_max: { value: '1', currency: 'USD', issuer: 'rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B' },
+					destination_amount: { value: '-1', currency: 'XAH', issuer: 'rswh1fvyLqHizBS2awu1vs6QcmwTBd9qiv' },
+					source_account: account,
+					// flags: 65536,
+					subcommand: 'create'
+				}
+				// console.log(command)
+				const path_result = await xrpl.send(command)
+				// console.log('NoRippleDirect path_result', path_result)
+				path_result.result.time = new Date().getTime()
+				// memes[key] = path_result.result
+				const self = this
+
+				let atm_filter = new filter()
+				
+				xrpl.on('path', async (path) => {
+					if ('error' in path) { return }
+
+					try {
+						if ('alternatives' in path && self.fx !== undefined) {
+							path.time = new Date().getTime()
+							const Price = path.alternatives[0].destination_amount.value
+							const data = {}
+	
+							const values = [{
+								p: new decimal(1 / Price).toFixed(10) * 1,
+								e: 'XRPL',
+								t: new Date().getTime(),
+								s: 'socket'
+							}]
+	
+							let bitrue 
+							try {
+								bitrue = await axios.get('https://openapi.bitrue.com/api/v1/ticker/bookTicker?symbol=XAHUSDT')
+								values.push({
+									p: bitrue.data?.bidPrice * 1,
+									e: 'bitrue',
+									t: new Date().getTime(),
+									s: 'rest'
+								})
+							} catch(e) {
+								// do nothing
+							}
+	
+							const agg = atm_filter.aggregate(values, 5000)
+	
+	
+							data['USD'] = {
+								Token: 'USD',
+								Price: agg.filteredMean,
+								Results: agg.rawExchanges.length,
+								//Exchanges: agg.rawExchanges,
+								LastRecord: agg.lastRecord,
+								RawResults: agg.rawFiltered,
+								// RawData: agg.rawData,
+								Timestamp: agg.timestamp
+							}
+	
+							// log(data['USD'])
+	
+							for (let index = 0; index < self.fx.length; index++) {
+								const element = self.fx[index]
+								if (element.target !== 'EUR' && element.target !== 'JPY' && element.target !== 'GBP' && element.target !== 'CHF'
+									&& element.target !== 'CAD' && element.target !== 'AUD' && element.target !== 'CNY' ) {
+										continue
+								}
+								data[element.target] = {
+									Token: element.target,
+									Price: new decimal(element.rate * (1/ Price)).toFixed(10) * 1,
+									Results: 1,
+									RawResults: [{
+										exchange: 'XRPL', 
+										price: new decimal(element.rate * (1/ Price)).toFixed(10) * 1
+									}],
+									Timestamp: new Date().getTime()
+								}
+							}
+							
+							// log(data)
+							// log(memes[key])
+							self.route('oracle-'+key, data)
+						}
+					} catch(e) {
+						log('error', e)
+					}
+				})
+
+				const hhhmmmm = async () => {
+					console.log('upstream connection closed NoRippleDirect ' + key)
+					memes[key] = undefined
+				}
+				xrpl.on('close', hhhmmmm)
+				xrpl.on('error', (error) => {
+					console.log('error pathing NoRippleDirect ' + key, error)
+					memes[key] = undefined
+				})
+			},
+			async pathEVR() {
+				const account = 'r36cEzVdd1rzFMjCf7NdBWHYNREjoNUbsm' // USE THE AMM POOL ADDRESS
+				const key = 'EVR'
+
+				const xrpl = new XrplClient([ClientConnection], { tryAllNodes: false })
+				await xrpl.ready()
+
+				const command = {
+					command: 'path_find',
+					id: '99-NoRipple-' + key,
+					destination_account: account,
+					send_max: { value: '1', currency: 'USD', issuer: 'rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B' },
+					destination_amount: { value: '-1', currency: 'EVR', issuer: 'ra9g3LAJm9xJu8Awe7oWzR6VXFB1mpFtSe' },
+					source_account: account,
+					// flags: 65536,
+					subcommand: 'create'
+				}
+				// console.log(command)
+				const path_result = await xrpl.send(command)
+				// console.log('NoRippleDirect path_result', path_result)
+				path_result.result.time = new Date().getTime()
+				// memes[key] = path_result.result
+				const self = this
+
+				let atm_filter = new filter()
+				
+				xrpl.on('path', async (path) => {
+					if ('error' in path) { return }
+
+					try {
+						if ('alternatives' in path && self.fx !== undefined) {
+							path.time = new Date().getTime()
+							const Price = path.alternatives[0].destination_amount.value
+							const data = {}
+	
+							const values = [{
+								p: new decimal(1 / Price).toFixed(10) * 1,
+								e: 'XRPL',
+								t: new Date().getTime(),
+								s: 'socket'
+							}]
+	
+							let bitrue 
+							try {
+								bitrue = await axios.get('https://openapi.bitrue.com/api/v1/ticker/bookTicker?symbol=EVRUSDT')
+								values.push({
+									p: bitrue.data?.bidPrice * 1,
+									e: 'bitrue',
+									t: new Date().getTime(),
+									s: 'rest'
+								})
+							} catch(e) {
+								// do nothing
+							}
+	
+							const agg = atm_filter.aggregate(values, 5000)
+	
+	
+							data['USD'] = {
+								Token: 'USD',
+								Price: agg.filteredMean,
+								Results: agg.rawExchanges.length,
+								//Exchanges: agg.rawExchanges,
+								LastRecord: agg.lastRecord,
+								RawResults: agg.rawFiltered,
+								// RawData: agg.rawData,
+								Timestamp: agg.timestamp
+							}
+	
+							// log(data['USD'])
+	
+							for (let index = 0; index < self.fx.length; index++) {
+								const element = self.fx[index]
+								if (element.target !== 'EUR' && element.target !== 'JPY' && element.target !== 'GBP' && element.target !== 'CHF'
+									&& element.target !== 'CAD' && element.target !== 'AUD' && element.target !== 'CNY' ) {
+										continue
+								}
+								data[element.target] = {
+									Token: element.target,
+									Price: new decimal(element.rate * (1/ Price)).toFixed(10) * 1,
+									Results: 1,
+									RawResults: [{
+										exchange: 'XRPL', 
+										price: new decimal(element.rate * (1/ Price)).toFixed(10) * 1
+									}],
+									Timestamp: new Date().getTime()
+								}
+							}
+							
+							// log(data)
+							// log(memes[key])
+							self.route('oracle-'+key, data)
+						}
+					} catch(e) {
+						log('error', e)
+					}
+				})
+
+				const hhhmmmm = async () => {
+					console.log('upstream connection closed NoRippleDirect ' + key)
+					memes[key] = undefined
+				}
+				xrpl.on('close', hhhmmmm)
+				xrpl.on('error', (error) => {
+					console.log('error pathing NoRippleDirect ' + key, error)
+					memes[key] = undefined
+				})
+			},
 			async pathATM() {
-				const account = 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8' // USE THE AMM POOL ADDRESS
+				const account = 'rUDdZsUbxbyCp2WeB2DTRLUpyDs1LUubK9' // USE THE AMM POOL ADDRESS
 				const key = 'ATM'
 
 				const xrpl = new XrplClient([ClientConnection], { tryAllNodes: false })
