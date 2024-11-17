@@ -307,7 +307,7 @@ class service  {
 							try {
 								const bitmart = await axios.get('https://api-cloud.bitmart.com/spot/quotation/v3/ticker?symbol=EVR_USDT')
 								values.push({
-									p: bitmart.data?.bid_px * 1,
+									p: bitmart.data?.data?.bid_px * 1,
 									e: 'bitmart',
 									t: new Date().getTime(),
 									s: 'rest'
@@ -327,9 +327,8 @@ class service  {
 							} catch(e) {
 								// do nothing
 							}
-	
+
 							const agg = atm_filter.aggregate(values, 5000)
-	
 	
 							data['USD'] = {
 								Token: 'USD',
