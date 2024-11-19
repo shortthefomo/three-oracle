@@ -14,7 +14,7 @@ class service  {
 	constructor() {
 		const wss = new WebSocketServer({ port: process.env.APP_PORT })
 		const wss_admin = new WebSocketServer({ port: process.env.APP_ADMIN_PORT })
-		const ClientConnection = 'wss://slashdog.panicbot.xyz'
+		const ClientConnection = process.env.APP_XRPL
 
 		let socket
 		let socketFX
