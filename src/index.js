@@ -14,7 +14,7 @@ class service  {
 	constructor() {
 		const wss = new WebSocketServer({ port: process.env.APP_PORT })
 		const wss_admin = new WebSocketServer({ port: process.env.APP_ADMIN_PORT })
-		const ClientConnection = process.env.APP_XRPL
+		const ClientConnection = [process.env.APP_XRPL, 'wss://xrplcluster.com', 'wss://xrpl.link', 'wss://s2.ripple.com']
 
 		let socket
 		let socketFX
@@ -146,7 +146,7 @@ class service  {
 				const account = 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8' // USE THE AMM POOL ADDRESS
 				const key = 'XAH'
 
-				const xrpl = new XrplClient([ClientConnection], { tryAllNodes: false })
+				const xrpl = new XrplClient(ClientConnection, { tryAllNodes: false })
 				await xrpl.ready()
 
 				const command = {
@@ -254,7 +254,7 @@ class service  {
 				const account = 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8' // USE THE AMM POOL ADDRESS
 				const key = 'EVR'
 
-				const xrpl = new XrplClient([ClientConnection], { tryAllNodes: false })
+				const xrpl = new XrplClient(ClientConnection, { tryAllNodes: false })
 				await xrpl.ready()
 
 				const command = {
@@ -384,7 +384,7 @@ class service  {
 				const account = 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8' // USE THE AMM POOL ADDRESS
 				const key = 'ATM'
 
-				const xrpl = new XrplClient([ClientConnection], { tryAllNodes: false })
+				const xrpl = new XrplClient(ClientConnection, { tryAllNodes: false })
 				await xrpl.ready()
 
 				const command = {
