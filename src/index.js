@@ -70,7 +70,7 @@ class service  {
                     await self.waitForOpenConnection(socket)
                     socket.send(JSON.stringify({
                         op: 'subscribe',
-                        channel: 'public'
+                        channel: 'threexrpl'
                     }))
                     ping = setInterval(function() {
                         socket.send(JSON.stringify({ op: 'ping' }))
@@ -302,6 +302,7 @@ class service  {
 								})
 							} catch(e) {
 								// do nothing
+								log('error', e)
 							}
 
 							try {
@@ -314,6 +315,7 @@ class service  {
 								})
 							} catch(e) {
 								// do nothing
+								log('error', e)
 							}
 
 							try {
@@ -326,8 +328,9 @@ class service  {
 								})
 							} catch(e) {
 								// do nothing
+								log('error', e)
 							}
-
+							log(values)
 							const agg = atm_filter.aggregate(values, 5000)
 	
 							data['USD'] = {
@@ -437,7 +440,7 @@ class service  {
 	
 							const agg = atm_filter.aggregate(values, 5000)
 	
-	
+							log('agg', agg)
 							data['USD'] = {
 								Token: 'USD',
 								Price: agg.filteredMean,

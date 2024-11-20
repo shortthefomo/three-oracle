@@ -156,6 +156,7 @@ module.exports = class filter extends EventEmitter {
 						let dollarUSLocale = Intl.NumberFormat('en-US')
 						trade_stats = dollarUSLocale.format(new decimal(data.stats.t.s).toFixed(0))
 					}
+					// log(data)
                 }
                 socket.on('message', handler)
             },
