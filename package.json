@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "DEBUG=apps* nodemon src/index.js",
     "prod": "DEBUG=apps* nodemon src/index.js",
-    "start": "DEBUG=apps* node ./src/main.js"
+    "start": "DEBUG=apps* node src/index.js"
   },
   "author": "Lathan Britz",
   "license": "MIT",
