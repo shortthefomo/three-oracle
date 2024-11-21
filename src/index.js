@@ -144,7 +144,7 @@ class service  {
 				}
 				// console.log(command)
 				const path_result = await xrpl.send(command)
-				if ('error' in result) { return }
+				if ('error' in path_result) { return }
 				// console.log('NoRippleDirect path_result', path_result)
 				path_result.result.time = new Date().getTime()
 				// memes[key] = path_result.result
@@ -253,7 +253,7 @@ class service  {
 				}
 				// console.log(command)
 				const path_result = await xrpl.send(command)
-				if ('error' in result) { return }
+				if ('error' in path_result) { return }
 				// console.log('NoRippleDirect path_result', path_result)
 				path_result.result.time = new Date().getTime()
 				// memes[key] = path_result.result
@@ -387,7 +387,7 @@ class service  {
 				}
 				// console.log(command)
 				const path_result = await xrpl.send(command)
-				if ('error' in result) { return }
+				if ('error' in path_result) { return }
 				// console.log('NoRippleDirect path_result', path_result)
 				path_result.result.time = new Date().getTime()
 				// memes[key] = path_result.result
