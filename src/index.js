@@ -182,7 +182,7 @@ class service  {
 							}
 	
 							const agg = atm_filter.aggregate(values, 5000)
-							log('agg', 'XAH', agg)
+							log('agg', 'XAH', agg.filteredMean)
 	
 							data['USD'] = {
 								Token: 'USD',
@@ -317,7 +317,7 @@ class service  {
 							}
 							
 							const agg = atm_filter.aggregate(values, 5000)
-							log('agg', 'EVR', agg)
+							log('agg', 'EVR', agg.filteredMean)
 
 							data['USD'] = {
 								Token: 'USD',
@@ -427,7 +427,7 @@ class service  {
 	
 							const agg = atm_filter.aggregate(values, 5000)
 	
-							log('agg', 'ATM', agg)
+							log('agg', 'ATM', agg.filteredMean)
 							data['USD'] = {
 								Token: 'USD',
 								Price: agg.filteredMean,
