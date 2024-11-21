@@ -134,7 +134,7 @@ class service  {
 
 				const command = {
 					command: 'path_find',
-					id: '99-NoRipple-' + key,
+					id: '66-oracle-' + key,
 					destination_account: account,
 					send_max: { value: '1', currency: 'USD', issuer: 'rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B' },
 					destination_amount: { value: '-1', currency: 'XAH', issuer: 'rswh1fvyLqHizBS2awu1vs6QcmwTBd9qiv' },
@@ -144,6 +144,7 @@ class service  {
 				}
 				// console.log(command)
 				const path_result = await xrpl.send(command)
+				if ('error' in result) { return }
 				// console.log('NoRippleDirect path_result', path_result)
 				path_result.result.time = new Date().getTime()
 				// memes[key] = path_result.result
@@ -242,7 +243,7 @@ class service  {
 
 				const command = {
 					command: 'path_find',
-					id: '99-NoRipple-' + key,
+					id: '66-oracle-' + key,
 					destination_account: account,
 					send_max: { value: '1', currency: 'USD', issuer: 'rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B' },
 					destination_amount: { value: '-1', currency: 'EVR', issuer: 'ra9g3LAJm9xJu8Awe7oWzR6VXFB1mpFtSe' },
@@ -252,6 +253,7 @@ class service  {
 				}
 				// console.log(command)
 				const path_result = await xrpl.send(command)
+				if ('error' in result) { return }
 				// console.log('NoRippleDirect path_result', path_result)
 				path_result.result.time = new Date().getTime()
 				// memes[key] = path_result.result
@@ -375,7 +377,7 @@ class service  {
 
 				const command = {
 					command: 'path_find',
-					id: '99-NoRipple-' + key,
+					id: '66-oracle-' + key,
 					destination_account: account,
 					send_max: { value: '1', currency: 'USD', issuer: 'rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B' },
 					destination_amount: { value: '-1', currency: 'ATM', issuer: 'raDZ4t8WPXkmDfJWMLBcNZmmSHmBC523NZ' },
@@ -385,6 +387,7 @@ class service  {
 				}
 				// console.log(command)
 				const path_result = await xrpl.send(command)
+				if ('error' in result) { return }
 				// console.log('NoRippleDirect path_result', path_result)
 				path_result.result.time = new Date().getTime()
 				// memes[key] = path_result.result
