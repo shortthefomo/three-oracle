@@ -30,7 +30,7 @@ class service  {
 				this.pathEVR()
 				this.connect()
 				this.forex()
-				// this.server()
+				this.server()
 				oracle = new filter(socket)
 				const self = this
 
@@ -105,20 +105,20 @@ class service  {
                     }, intervalTime)
                 })
             },
-			// server() {
-			// 	wss.on('connection', (ws, req) => {
-			// 		ws.on('message', (message) => {
-			// 			//log(message)
-			// 		})
-			// 		ws.on('close', () => {
-			// 			log('client disconnected')
-			// 		})
-			// 		ws.on('error', (error) => {
-			// 			log('SocketServer error')
-			// 			// log(error)
-			// 		})
-			// 	})
-			// },
+			server() {
+				wss.on('connection', (ws, req) => {
+					ws.on('message', (message) => {
+						//log(message)
+					})
+					ws.on('close', () => {
+						log('client disconnected')
+					})
+					ws.on('error', (error) => {
+						log('SocketServer error')
+						// log(error)
+					})
+				})
+			},
 			route(channel, message) {
 				const string = '{"' + channel +'": ' + JSON.stringify(message) + '}'
 				wss.clients.forEach(function each(client) {
