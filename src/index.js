@@ -28,36 +28,7 @@ class service  {
 				this.pathATM()
 				this.pathXAH()
 				this.pathEVR()
-				this.connect()
 				this.forex()
-				this.server()
-				oracle = new filter(socket)
-				const self = this
-
-				// adjust the interval and record timeout
-				oracle.run(250, 60000)
-
-				oracle.on('oracle', (data) => {
-					self.route('oracle', data)
-					// log(data)
-					let logData = {}
-					Object.entries(data).forEach(([key, value]) => {
-						if (key !== 'STATS') {
-							logData[key] = {
-								Price: value.Price,
-								Results: value.Results,
-								LastRecord: value.LastRecord
-							}
-						}
-                    })
-					logData['STATS'] = data['STATS']
-					// log(logData)
-				})
-
-				oracle.on('dex', (data) => {
-					self.route('dex', data)
-					// log(data)
-				})
 			},
 			connect() {
 				if (ping !== undefined) {
@@ -105,20 +76,6 @@ class service  {
                     }, intervalTime)
                 })
             },
-			server() {
-				wss.on('connection', (ws, req) => {
-					ws.on('message', (message) => {
-						//log(message)
-					})
-					ws.on('close', () => {
-						log('client disconnected')
-					})
-					ws.on('error', (error) => {
-						log('SocketServer error')
-						// log(error)
-					})
-				})
-			},
 			route(channel, message) {
 				const string = '{"' + channel +'": ' + JSON.stringify(message) + '}'
 				wss.clients.forEach(function each(client) {
@@ -142,12 +99,9 @@ class service  {
 					// flags: 65536,
 					subcommand: 'create'
 				}
-				// console.log(command)
 				const path_result = await xrpl.send(command)
 				if ('error' in path_result) { return }
-				// console.log('NoRippleDirect path_result', path_result)
 				path_result.result.time = new Date().getTime()
-				// memes[key] = path_result.result
 				const self = this
 
 				let atm_filter = new filter()
@@ -182,7 +136,6 @@ class service  {
 							}
 	
 							const agg = atm_filter.aggregate(values, 5000)
-							log('agg', 'XAH', agg.filteredMean)
 	
 							data['USD'] = {
 								Token: 'USD',
@@ -194,8 +147,6 @@ class service  {
 								// RawData: agg.rawData,
 								Timestamp: agg.timestamp
 							}
-	
-							// log(data['USD'])
 	
 							for (let index = 0; index < self.fx.length; index++) {
 								const element = self.fx[index]
@@ -214,9 +165,7 @@ class service  {
 									Timestamp: new Date().getTime()
 								}
 							}
-							
-							// log(data)
-							// log(memes[key])
+
 							self.route('oracle-'+key, data)
 						}
 					} catch(e) {
@@ -251,12 +200,9 @@ class service  {
 					// flags: 65536,
 					subcommand: 'create'
 				}
-				// console.log(command)
 				const path_result = await xrpl.send(command)
 				if ('error' in path_result) { return }
-				// console.log('NoRippleDirect path_result', path_result)
 				path_result.result.time = new Date().getTime()
-				// memes[key] = path_result.result
 				const self = this
 
 				let atm_filter = new filter()
@@ -317,7 +263,6 @@ class service  {
 							}
 							
 							const agg = atm_filter.aggregate(values, 5000)
-							log('agg', 'EVR', agg.filteredMean)
 
 							data['USD'] = {
 								Token: 'USD',
@@ -329,8 +274,6 @@ class service  {
 								// RawData: agg.rawData,
 								Timestamp: agg.timestamp
 							}
-	
-							// log(data['USD'])
 	
 							for (let index = 0; index < self.fx.length; index++) {
 								const element = self.fx[index]
@@ -350,8 +293,6 @@ class service  {
 								}
 							}
 							
-							// log(data)
-							// log(memes[key])
 							self.route('oracle-'+key, data)
 						}
 					} catch(e) {
@@ -386,12 +327,9 @@ class service  {
 					// flags: 65536,
 					subcommand: 'create'
 				}
-				// console.log(command)
 				const path_result = await xrpl.send(command)
 				if ('error' in path_result) { return }
-				// console.log('NoRippleDirect path_result', path_result)
 				path_result.result.time = new Date().getTime()
-				// memes[key] = path_result.result
 				const self = this
 
 				let atm_filter = new filter()
@@ -427,7 +365,6 @@ class service  {
 	
 							const agg = atm_filter.aggregate(values, 5000)
 	
-							log('agg', 'ATM', agg.filteredMean)
 							data['USD'] = {
 								Token: 'USD',
 								Price: agg.filteredMean,
@@ -438,8 +375,6 @@ class service  {
 								// RawData: agg.rawData,
 								Timestamp: agg.timestamp
 							}
-	
-							// log(data['USD'])
 	
 							for (let index = 0; index < self.fx.length; index++) {
 								const element = self.fx[index]
@@ -458,9 +393,7 @@ class service  {
 									Timestamp: new Date().getTime()
 								}
 							}
-							
-							// log(data)
-							// log(memes[key])
+
 							self.route('oracle-'+key, data)
 						}
 					} catch(e) {
@@ -485,10 +418,9 @@ class service  {
 					const data = JSON.parse(message.data)
 					if ('rates' in data) {
 						self.fx = data.rates
-						// log(data.rates)
 					}
 				}
-				socket.onclose = function (event) {
+				socketFX.onclose = function (event) {
 					// need better reconnect here
 					setTimeout(() => {
 						self.forex()

@@ -15,7 +15,6 @@ module.exports = class filter extends EventEmitter {
 		const dex = {}
 		let trade_stats = ''
 		let running = false
-		let pathing_interval = undefined
 
         Object.assign(this, {
             run(interval = 100, time = 5000) {
@@ -25,8 +24,6 @@ module.exports = class filter extends EventEmitter {
 				if (!running)  {
 					log('starting to listen for price')
 					this.trades()
-					// this.pathing()
-					// this.pathEmit()
 					running = true
 				}
 
@@ -45,8 +42,7 @@ module.exports = class filter extends EventEmitter {
 						}
 					}
 				})
-				cex_results['STATS'] = {TradeVolume: trade_stats }
-				
+				cex_results['STATS'] = { TradeVolume: trade_stats }
 				setTimeout(() => {
 					this.emit('oracle', cex_results)
 					this.emit('dex', dex)
@@ -54,7 +50,6 @@ module.exports = class filter extends EventEmitter {
 				}, interval)
 			},
             aggregate(results, time) {
-				//log('results', Object.values(results))
 				if (results === undefined) { return false }
 				const timeFiltered = Object.values(results).filter((item) => item.t > Date.now() - time)
 				const rawFiltered = Object.values(timeFiltered).map((item) => { 
@@ -69,7 +64,6 @@ module.exports = class filter extends EventEmitter {
 				const rawTimeFiltered = Object.values(timeFiltered).map((item) => { 
                     return item.t
                 })
-				// log('rawResults', rawResults)
                 const summed = Object.values(timeFiltered).map((item) => {
                     return item.a
                 })
@@ -122,16 +116,13 @@ module.exports = class filter extends EventEmitter {
 					const r = new decimal(rawResults[index])
 					const m = new decimal(rawMedian)
 					const d = new decimal(rawStdev)
-					// console.log('r m d', r.toFixed(8) , m.toFixed(8), d.toFixed(8))
 					const abs = Math.abs(r.minus(m).toFixed(8))
-			
-					// console.log('abs', abs)
+
 					if (new decimal(abs).lessThanOrEqualTo(d.toFixed(8))) {
 						results.push(r.toFixed(8) * 1)
 					}
 				}
 			
-				// console.log('results', results)
 				return results
 			},
             async trades() {
@@ -156,69 +147,9 @@ module.exports = class filter extends EventEmitter {
 						let dollarUSLocale = Intl.NumberFormat('en-US')
 						trade_stats = dollarUSLocale.format(new decimal(data.stats.t.s).toFixed(0))
 					}
-					// log(data)
                 }
                 socket.on('message', handler)
             },
-			async pathing(key = 'threepath') {
-				if (pathing_interval !== undefined) {
-					clearInterval(pathing_interval)
-					pathing_interval = undefined
-				}
-				const xrpl = new XrplClient(['ws://localhost', 'wss://xrplcluster.com', 'wss://s2.ripple.com'])
-				let lastUpdate = Date.now()
-				const self = this
-                const cmd = {
-                    id: key,
-                    command: 'path_find',
-                    subcommand: 'create',
-                    source_account: 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8',
-                    destination_account: 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8',
-                    destination_amount: {
-						'value': 1,
-						'currency': 'XAH',
-						'issuer': 'rswh1fvyLqHizBS2awu1vs6QcmwTBd9qiv'
-					}
-					//'1000000' //  1 XRP
-                }
-                const result = await xrpl.send(cmd)
-				const currencies = ['CSC']
-                // console.log('path init', result)
-                xrpl.on('path', (path) => {
-                    if ('error' in path) { return }
-                    console.log('path', path.alternatives)
-					for (let index = 0; index < path.alternatives.length; index++) {
-						const element = path.alternatives[index]
-						const currency = this.currencyHexToUTF8(element.source_amount.currency)
-						if (!currencies.includes(currency)) { continue }
-						element.paths_computed.forEach(item => {
-							if ('account' in item[0]) {
-								if (dex[currency] === undefined) { dex[currency] = {} }
-								dex[currency][item[0].account] = {
-									Token: currency,
-									Issuer: item[0].account,
-									Price: element.source_amount.value,
-									Timestamp: Date.now(),
-								}
-							}
-						})
-					}
-					lastUpdate = Date.now()
-                })
-				pathing_interval = setInterval(() => {
-					if (Date.now() - lastUpdate > 180000) {
-						log('retstarting pathing..')
-						xrpl.close()
-						self.emit('path')
-					}
-				}, 10000)
-            },
-			pathEmit() {
-				const self = this
-				this.addListener('path', function() {
-					self.pathing()
-				})
-			},
 			currencyHexToUTF8(code) {
 				if (code.length === 3)
 					return code
