@@ -136,7 +136,7 @@ class service  {
 					// need better reconnect here
 					setTimeout(() => {
 						self.forex()
-					}, 10000)
+					}, 10_000)
 				}
 			}
 		})
