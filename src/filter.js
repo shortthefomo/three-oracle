@@ -15,7 +15,6 @@ module.exports = class filter extends EventEmitter {
 		const dex = {}
 		let trade_stats = ''
 		let running = false
-		let pathing_interval = undefined
 
         Object.assign(this, {
             run(interval = 100, time = 5000) {
@@ -28,6 +27,10 @@ module.exports = class filter extends EventEmitter {
 					// this.pathing()
 					// this.pathEmit()
 					running = true
+
+					this.addListener('run', function(interval, time) {
+						this.run(interval, time)				
+					})
 				}
 
 				Object.entries(cex).forEach(([token, value]) => {
@@ -50,7 +53,7 @@ module.exports = class filter extends EventEmitter {
 				setTimeout(() => {
 					this.emit('oracle', cex_results)
 					this.emit('dex', dex)
-					this.run(interval, time)
+					this.emit('run', interval, time)
 				}, interval)
 			},
             aggregate(results, time) {
@@ -160,65 +163,6 @@ module.exports = class filter extends EventEmitter {
                 }
                 socket.on('message', handler)
             },
-			async pathing(key = 'threepath') {
-				if (pathing_interval !== undefined) {
-					clearInterval(pathing_interval)
-					pathing_interval = undefined
-				}
-				const xrpl = new XrplClient(['ws://localhost', 'wss://xrplcluster.com', 'wss://s2.ripple.com'])
-				let lastUpdate = Date.now()
-				const self = this
-                const cmd = {
-                    id: key,
-                    command: 'path_find',
-                    subcommand: 'create',
-                    source_account: 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8',
-                    destination_account: 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8',
-                    destination_amount: {
-						'value': 1,
-						'currency': 'XAH',
-						'issuer': 'rswh1fvyLqHizBS2awu1vs6QcmwTBd9qiv'
-					}
-					//'1000000' //  1 XRP
-                }
-                const result = await xrpl.send(cmd)
-				const currencies = ['CSC']
-                // console.log('path init', result)
-                xrpl.on('path', (path) => {
-                    if ('error' in path) { return }
-                    console.log('path', path.alternatives)
-					for (let index = 0; index < path.alternatives.length; index++) {
-						const element = path.alternatives[index]
-						const currency = this.currencyHexToUTF8(element.source_amount.currency)
-						if (!currencies.includes(currency)) { continue }
-						element.paths_computed.forEach(item => {
-							if ('account' in item[0]) {
-								if (dex[currency] === undefined) { dex[currency] = {} }
-								dex[currency][item[0].account] = {
-									Token: currency,
-									Issuer: item[0].account,
-									Price: element.source_amount.value,
-									Timestamp: Date.now(),
-								}
-							}
-						})
-					}
-					lastUpdate = Date.now()
-                })
-				pathing_interval = setInterval(() => {
-					if (Date.now() - lastUpdate > 180000) {
-						log('retstarting pathing..')
-						xrpl.close()
-						self.emit('path')
-					}
-				}, 10000)
-            },
-			pathEmit() {
-				const self = this
-				this.addListener('path', function() {
-					self.pathing()
-				})
-			},
 			currencyHexToUTF8(code) {
 				if (code.length === 3)
 					return code
