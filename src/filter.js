@@ -15,12 +15,13 @@ module.exports = class filter extends EventEmitter {
 		const dex = {}
 		let trade_stats = ''
 		let running = false
-
+		let timeout = undefined
         Object.assign(this, {
             run(interval = 100, time = 5000) {
 				if (!def) { return }
+				if (timeout !== undefined) { clearTimeout(timeout) }
 				const cex_results = {}
-
+				
 				if (!running)  {
 					log('starting to listen for price')
 					this.trades()
@@ -50,7 +51,7 @@ module.exports = class filter extends EventEmitter {
 				})
 				cex_results['STATS'] = {TradeVolume: trade_stats }
 				
-				setTimeout(() => {
+				timeout = setTimeout(() => {
 					this.emit('oracle', cex_results)
 					this.emit('dex', dex)
 					this.emit('run', interval, time)

@@ -15,6 +15,7 @@ class service  {
 		const wss = new WebSocketServer({ port: process.env.APP_PORT })
 		const ClientConnection = [process.env.APP_XRPL, 'wss://xrplcluster.com', 'wss://xrpl.link', 'wss://s2.ripple.com']
 
+		let openConnectionInterval
 		let socket
 		let socketFX
 		let ping
@@ -23,6 +24,16 @@ class service  {
 		let fx
 
 		Object.assign(this, {
+			logAppStats() {
+				const usage = process.memoryUsage()
+				usage.rss = usage.rss / Math.pow(1000, 2)
+				usage.heapTotal = usage.heapTotal / Math.pow(1000, 2)
+				usage.heapUsed = usage.heapUsed / Math.pow(1000, 2)
+				usage.external = usage.external / Math.pow(1000, 2)
+				usage.arrayBuffers = usage.arrayBuffers / Math.pow(1000, 2)
+
+				log(`rss: ${usage.rss} MB, total: ${usage.heapTotal} MB, used: ${usage.heapUsed} MB, external: ${usage.external} MB, arrayBuffers: ${usage.arrayBuffers} MB`)
+			},
 		    async run() {
 				log('runnig')
 				this.connect()
@@ -55,6 +66,9 @@ class service  {
 					self.route('dex', data)
 					// log(data)
 				})
+				setInterval(function() {
+					self.logAppStats()
+				}, 10000)
 			},
 			connect() {
 				if (ping !== undefined) {
@@ -64,6 +78,7 @@ class service  {
 				socket = new WebSocket(process.env.APP_SOCKET)
 				socket.onopen = async function (message) {
                     await self.waitForOpenConnection(socket)
+					clearInterval(openConnectionInterval)
                     socket.send(JSON.stringify({
                         op: 'subscribe',
                         channel: 'threexrpl'
@@ -77,9 +92,9 @@ class service  {
 					// need better reconnect here
 					console.log('socket closed', event)
 					setTimeout(() => {
-						if ( oracle !== undefined) {
-							oracle.reset()
-						}
+						// if ( oracle !== undefined) {
+						// 	oracle.reset()
+						// }
 						self.connect()
 					}, 10000)
 				}
@@ -90,12 +105,10 @@ class service  {
                     const intervalTime = 200 //ms
 
                     let currentAttempt = 0
-                    const interval = setInterval(() => {
+                    openConnectionInterval = setInterval(() => {
                         if (currentAttempt > maxNumberOfAttempts - 1) {
-                            clearInterval(interval)
                             reject(new Error('Maximum number of attempts exceeded'))
                         } else if (socket.readyState == 1) {
-                            clearInterval(interval)
                             resolve()
                         }
                         currentAttempt++
