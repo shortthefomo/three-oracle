@@ -18,7 +18,6 @@ class service  {
 		let socket
 		let socketFX
 		let ping
-		let oracle
 		let memes = {}
 		let fx
 
@@ -44,18 +43,22 @@ class service  {
                     }))
                     ping = setInterval(function() {
                         socket.send(JSON.stringify({ op: 'ping' }))
-                    }, 5000)
+                    }, 5_000)
                     console.log('socket_three trade sockets connected! :)')
                 }
 				socket.onclose = function (event) {
 					// need better reconnect here
 					console.log('socket closed', event)
 					setTimeout(() => {
-						if ( oracle !== undefined) {
-							oracle.reset()
-						}
 						self.connect()
-					}, 10000)
+					}, 10_000)
+				}
+				socket.onerror = function (event) {
+					// need better reconnect here
+					console.log('socket error', event)
+					setTimeout(() => {
+						self.connect()
+					}, 10_000)
 				}
 			},
 			async waitForOpenConnection(socket) {
