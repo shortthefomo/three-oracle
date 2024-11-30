@@ -59,7 +59,7 @@ class service  {
 						}
                     })
 					// logData['STATS'] = data['STATS']
-					log(logData)
+					// log(logData)
 					if (Object.entries(logData).length === 0 && connected) {
 						connected = false
 						log('reconnect no data ---------------->')
