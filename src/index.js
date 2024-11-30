@@ -45,9 +45,10 @@ class service extends EventEmitter {
 
 				this.connect()
 				this.newOracle()
+				this.eventListeners()
 				setInterval(function() {
 					self.emit('memstats')
-				}, 10_000)
+				}, 20_000)
 			},
 			newOracle() {
 				const self = this
