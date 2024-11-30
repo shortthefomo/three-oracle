@@ -20,6 +20,7 @@ class service  {
 		let socketFX
 		let ping
 		let oracle
+		let connected = false
 
 		Object.assign(this, {
 			logAppStats() {
@@ -54,10 +55,16 @@ class service  {
 								Results: value.Results,
 								LastRecord: value.LastRecord
 							}
+							connected = true
 						}
                     })
-					logData['STATS'] = data['STATS']
-					// log(logData)
+					// logData['STATS'] = data['STATS']
+					log(logData)
+					if (Object.entries(logData).length === 0 && connected) {
+						connected = false
+						log('reconnect no data ---------------->')
+						self.connect(true)
+					}
 				})
 
 				oracle.on('dex', (data) => {
