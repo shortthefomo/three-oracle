@@ -1,5 +1,6 @@
 'use strict'
 
+const EventEmitter = require('events')
 const axios = require('axios')
 const { XrplClient } = require('xrpl-client')
 const WebSocket = require('ws')
@@ -10,11 +11,14 @@ const debug = require('debug')
 const log = debug('apps:oracle')
 const filter = require('./filter.js')
 
-class service  {
+class service extends EventEmitter {
 	constructor() {
+		super()
+
 		const wss = new WebSocketServer({ port: process.env.APP_PORT })
 		const ClientConnection = [process.env.APP_XRPL, 'wss://xrplcluster.com', 'wss://xrpl.link', 'wss://s2.ripple.com']
 
+		let timeoutpause
 		let openConnectionInterval
 		let socket
 		let socketFX
@@ -35,18 +39,25 @@ class service  {
 			},
 		    async run() {
 				log('runnig')
-				this.connect()
+				const self = this
 				this.forex()
 				this.server()
-				oracle = new filter(socket)
+
+				this.connect()
+				this.newOracle()
+				setInterval(function() {
+					self.emit('memstats')
+				}, 10_000)
+			},
+			newOracle() {
 				const self = this
+				oracle = new filter(socket)
 
 				// adjust the interval and record timeout
 				oracle.run(250, 60000)
 
 				oracle.on('oracle', (data) => {
 					self.route('oracle', data)
-					// log(data)
 					let logData = {}
 					Object.entries(data).forEach(([key, value]) => {
 						if (key !== 'STATS') {
@@ -58,28 +69,48 @@ class service  {
 							connected = true
 						}
                     })
-					// logData['STATS'] = data['STATS']
-					// log(logData)
+
 					if (Object.entries(logData).length === 0 && connected) {
 						connected = false
 						log('reconnect no data ---------------->')
-						self.connect(true)
+						self.emit('reconnect-websocket')
 					}
 				})
 
 				oracle.on('dex', (data) => {
 					self.route('dex', data)
-					// log(data)
 				})
-				setInterval(function() {
-					self.logAppStats()
-				}, 10_000)
 			},
-			connect(reconnect = false) {
+			eventListeners() {
+				this.addListener('memstats', async () => {
+					this.logAppStats()
+				})
+				this.addListener('reconnect-websocket', async () => {
+					await this.pause(5_000)
+					log('Reconnecting websocket....')
+					clearTimeout(timeoutpause)
+					this.connect()
+					this.newOracle()
+				})
+				this.addListener('reconnect-forex', async () => {
+					await this.pause(5_000)
+					log('Reconnecting FOREX websocket....')
+					clearTimeout(timeoutpause)
+					this.forex()
+				})
+			},
+			async pause(milliseconds = 1000) {
+				return new Promise(resolve => {
+					console.log('pausing....')
+					timeoutpause = setTimeout(resolve, milliseconds)
+				})
+			},
+			connect() {
+				const self = this
 				if (ping !== undefined) {
                     clearInterval(ping)
                 }
-				const self = this
+				
 				socket = new WebSocket(process.env.APP_SOCKET)
 				socket.onopen = async function (message) {
                     await self.waitForOpenConnection(socket)
@@ -91,24 +122,17 @@ class service  {
                     ping = setInterval(function() {
                         socket.send(JSON.stringify({ op: 'ping' }))
                     }, 5_000)
-					if (reconnect) {
-						oracle.trades()
-					}
                     console.log('socket_three trade sockets connected! :)')
                 }
 				socket.onclose = function (event) {
 					// need better reconnect here
 					console.log('socket closed', event)
-					setTimeout(() => {
-						self.connect(true)
-					}, 10_000)
+					self.emit('reconnect-websocket')
 				}
 				socket.onerror = function (event) {
 					// need better reconnect here
 					console.log('socket error', event)
-					setTimeout(() => {
-						self.connect(true)
-					}, 10_000)
+					self.emit('reconnect-websocket')
 				}
 			},
 			async waitForOpenConnection(socket) {
@@ -154,14 +178,10 @@ class service  {
 					const data = JSON.parse(message.data)
 					if ('rates' in data) {
 						self.fx = data.rates
-						// log(data.rates)
 					}
 				}
 				socketFX.onclose = function (event) {
-					// need better reconnect here
-					setTimeout(() => {
-						self.forex()
-					}, 10_000)
+					self.emit('reconnect-forex')
 				}
 			}
 		})
