@@ -96,6 +96,7 @@ class service extends EventEmitter {
 					clearTimeout(timeoutpause)
 					this.connect()
 					this.newOracle()
+					await this.pause(5_000)
 					// setTimeout(() => {
 					// 	timeout_connected = false
 					// }, 2000)
