@@ -93,7 +93,7 @@ class service extends EventEmitter {
 					this.logAppStats()
 				})
 				this.addListener('reconnect-websocket', async () => {
-					timeout_connected = true
+					// timeout_connected = true
 					await this.pause(5_000)
 					log('Reconnecting websocket....')
 					clearTimeout(timeoutpause)
