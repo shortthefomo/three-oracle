@@ -25,6 +25,7 @@ class service extends EventEmitter {
 		let socketFX
 		let ping
 		let oracle
+		let data_copy
 		let connected = false
 		// let timeout_connected = true
 
@@ -62,6 +63,7 @@ class service extends EventEmitter {
 				oracle.on('oracle', (data) => {
 					self.route('oracle', data)
 					let logData = {}
+					data_copy = data
 					Object.entries(data).forEach(([key, value]) => {
 						if (key !== 'STATS') {
 							logData[key] = {
@@ -74,7 +76,7 @@ class service extends EventEmitter {
                     })
 
 					// if (Object.entries(logData).length === 0 && connected && timeout_connected) {
-					if (Object.entries(logData).length === 0 && connected && ready) {
+					if ((Object.keys(logData).length === 0 || Object.keys(logData).length === 1) && connected && ready) {
 						connected = false
 						log('reconnect no data ---------------->')
 						self.emit('kill-process')
@@ -92,6 +94,7 @@ class service extends EventEmitter {
 			eventListeners() {
 				this.addListener('memstats', async () => {
 					this.logAppStats()
+					log('data size', Object.keys(data_copy).length)
 				})
 				this.addListener('kill-process', async () => {
 					process.exit(1)
