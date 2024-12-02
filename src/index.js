@@ -76,7 +76,7 @@ class service extends EventEmitter {
                     })
 
 					// if (Object.entries(logData).length === 0 && connected && timeout_connected) {
-					if ((Object.keys(logData).length === 0 || Object.keys(logData).length === 1) && connected && ready) {
+					if ((Object.keys(data_copy).length <= 1) && connected && ready) {
 						connected = false
 						log('reconnect no data ---------------->')
 						self.emit('kill-process')
