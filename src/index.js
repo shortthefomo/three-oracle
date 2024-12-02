@@ -55,7 +55,7 @@ class service extends EventEmitter {
 			async newOracle() {
 				const self = this
 				oracle = new filter(socket)
-				ready = false
+				let ready = false
 				// adjust the interval and record timeout
 				oracle.run(250, 60000)
 
