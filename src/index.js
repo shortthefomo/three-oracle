@@ -77,7 +77,7 @@ class service extends EventEmitter {
 					if (Object.entries(logData).length === 0 && connected && ready) {
 						connected = false
 						log('reconnect no data ---------------->')
-						self.emit('reconnect-websocket')
+						self.emit('kill-process')
 					}
 				})
 
@@ -91,6 +91,9 @@ class service extends EventEmitter {
 			eventListeners() {
 				this.addListener('memstats', async () => {
 					this.logAppStats()
+				})
+				this.addListener('kill-process', async () => {
+					process.exit(1)
 				})
 				this.addListener('reconnect-websocket', async () => {
 					// timeout_connected = true
