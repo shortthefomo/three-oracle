@@ -10,6 +10,7 @@ const dotenv = require('dotenv')
 const debug = require('debug')
 const log = debug('apps:oracle')
 const filter = require('./filter.js')
+const { setTimeout } = require('timers/promises')
 
 class service extends EventEmitter {
 	constructor() {
@@ -25,6 +26,7 @@ class service extends EventEmitter {
 		let ping
 		let oracle
 		let connected = false
+		let timeout_connected = true
 
 		Object.assign(this, {
 			logAppStats() {
@@ -71,7 +73,7 @@ class service extends EventEmitter {
 						}
                     })
 
-					if (Object.entries(logData).length === 0 && connected) {
+					if (Object.entries(logData).length === 0 && connected && timeout_connected) {
 						connected = false
 						log('reconnect no data ---------------->')
 						self.emit('reconnect-websocket')
@@ -87,11 +89,15 @@ class service extends EventEmitter {
 					this.logAppStats()
 				})
 				this.addListener('reconnect-websocket', async () => {
+					timeout_connected = true
 					await this.pause(5_000)
 					log('Reconnecting websocket....')
 					clearTimeout(timeoutpause)
 					this.connect()
 					this.newOracle()
+					setTimeout(() => {
+						timeout_connected = false
+					}, 2000)
 				})
 				this.addListener('reconnect-forex', async () => {
 					await this.pause(5_000)
