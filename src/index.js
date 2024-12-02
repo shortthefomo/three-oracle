@@ -52,10 +52,10 @@ class service extends EventEmitter {
 					self.emit('memstats')
 				}, 20_000)
 			},
-			newOracle() {
+			async newOracle() {
 				const self = this
 				oracle = new filter(socket)
-
+				ready = false
 				// adjust the interval and record timeout
 				oracle.run(250, 60000)
 
@@ -74,7 +74,7 @@ class service extends EventEmitter {
                     })
 
 					// if (Object.entries(logData).length === 0 && connected && timeout_connected) {
-					if (Object.entries(logData).length === 0 && connected) {
+					if (Object.entries(logData).length === 0 && connected && ready) {
 						connected = false
 						log('reconnect no data ---------------->')
 						self.emit('reconnect-websocket')
@@ -84,6 +84,9 @@ class service extends EventEmitter {
 				oracle.on('dex', (data) => {
 					self.route('dex', data)
 				})
+
+				await this.pause(5_000)
+				ready = true
 			},
 			eventListeners() {
 				this.addListener('memstats', async () => {
@@ -96,7 +99,6 @@ class service extends EventEmitter {
 					clearTimeout(timeoutpause)
 					this.connect()
 					this.newOracle()
-					await this.pause(5_000)
 					// setTimeout(() => {
 					// 	timeout_connected = false
 					// }, 2000)
