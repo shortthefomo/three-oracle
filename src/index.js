@@ -85,8 +85,9 @@ class service extends EventEmitter {
 					self.route('dex', data)
 				})
 
-				await this.pause(5_000)
+				await this.pause(10_000)
 				ready = true
+				connected = true
 			},
 			eventListeners() {
 				this.addListener('memstats', async () => {
