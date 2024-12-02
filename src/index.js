@@ -26,7 +26,7 @@ class service extends EventEmitter {
 		let ping
 		let oracle
 		let connected = false
-		let timeout_connected = true
+		// let timeout_connected = true
 
 		Object.assign(this, {
 			logAppStats() {
@@ -73,7 +73,8 @@ class service extends EventEmitter {
 						}
                     })
 
-					if (Object.entries(logData).length === 0 && connected && timeout_connected) {
+					// if (Object.entries(logData).length === 0 && connected && timeout_connected) {
+					if (Object.entries(logData).length === 0 && connected) {
 						connected = false
 						log('reconnect no data ---------------->')
 						self.emit('reconnect-websocket')
@@ -95,9 +96,9 @@ class service extends EventEmitter {
 					clearTimeout(timeoutpause)
 					this.connect()
 					this.newOracle()
-					setTimeout(() => {
-						timeout_connected = false
-					}, 2000)
+					// setTimeout(() => {
+					// 	timeout_connected = false
+					// }, 2000)
 				})
 				this.addListener('reconnect-forex', async () => {
 					await this.pause(5_000)
