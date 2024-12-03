@@ -56,7 +56,6 @@ class service extends EventEmitter {
 			async newOracle() {
 				const self = this
 				oracle = new filter(socket)
-				let ready = false
 				// adjust the interval and record timeout
 				oracle.run(250, 60000)
 
@@ -74,30 +73,24 @@ class service extends EventEmitter {
 							// connected = true
 						}
                     })
-
-					// if (Object.entries(logData).length === 0 && connected && timeout_connected) {
-					if ((Object.keys(data_copy).length <= 1) && connected && ready) {
-						connected = false
-						log('reconnect no data ---------------->')
-						self.emit('kill-process')
-					}
 				})
 
 				oracle.on('dex', (data) => {
 					self.route('dex', data)
 				})
-
-				await this.pause(10_000)
-				ready = true
-				connected = true
 			},
 			eventListeners() {
 				this.addListener('memstats', async () => {
 					this.logAppStats()
 					log('data size', Object.keys(data_copy).length)
+					if (Object.keys(data_copy).length <= 1) {
+						connected = false
+						log('reconnect no data ---------------->')
+						this.emit('kill-process')
+					}
 				})
 				this.addListener('kill-process', async () => {
-					process.exit(1)
+					process.exit()
 				})
 				this.addListener('reconnect-websocket', async () => {
 					// timeout_connected = true
@@ -106,9 +99,6 @@ class service extends EventEmitter {
 					clearTimeout(timeoutpause)
 					this.connect()
 					this.newOracle()
-					// setTimeout(() => {
-					// 	timeout_connected = false
-					// }, 2000)
 				})
 				this.addListener('reconnect-forex', async () => {
 					await this.pause(5_000)
@@ -141,14 +131,15 @@ class service extends EventEmitter {
                         socket.send(JSON.stringify({ op: 'ping' }))
                     }, 5_000)
                     console.log('socket_three trade sockets connected! :)')
+					connected = true
                 }
 				socket.onclose = function (event) {
-					// need better reconnect here
+					connected = false
 					console.log('socket closed', event)
 					self.emit('reconnect-websocket')
 				}
 				socket.onerror = function (event) {
-					// need better reconnect here
+					connected = false
 					console.log('socket error', event)
 					self.emit('reconnect-websocket')
 				}
