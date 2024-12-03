@@ -71,7 +71,7 @@ class service extends EventEmitter {
 								Results: value.Results,
 								LastRecord: value.LastRecord
 							}
-							connected = true
+							// connected = true
 						}
                     })
 
