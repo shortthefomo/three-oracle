@@ -188,7 +188,7 @@ module.exports = class filter extends EventEmitter {
 			},
 			async pathRLUSD() {
 				const account = 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8' // USE THE AMM POOL ADDRESS
-				const key = 'XAH'
+				const key = 'RLUSD'
 
 				const xrpl = new XrplClient(ClientConnection, { tryAllNodes: false })
 				await xrpl.ready()
