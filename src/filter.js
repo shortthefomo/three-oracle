@@ -10,7 +10,8 @@ const log = debug('apps:filter')
 module.exports = class filter extends EventEmitter {
     constructor(socket, def = true) {
         super()
-
+		
+		const ClientConnection = [process.env.APP_XRPL, 'wss://xrplcluster.com', 'wss://xrpl.link', 'wss://s2.ripple.com']
 		const cex = {}
 		const dex = {}
 		let trade_stats = ''
@@ -53,7 +54,6 @@ module.exports = class filter extends EventEmitter {
 				
 				timeout = setTimeout(() => {
 					this.emit('oracle', cex_results)
-					this.emit('dex', dex)
 					this.emit('run', interval, time)
 				}, interval)
 			},
@@ -186,6 +186,62 @@ module.exports = class filter extends EventEmitter {
 
 				return bytes
 			},
+			async pathRLUSD() {
+				const account = 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8' // USE THE AMM POOL ADDRESS
+				const key = 'XAH'
+
+				const xrpl = new XrplClient(ClientConnection, { tryAllNodes: false })
+				await xrpl.ready()
+
+				const command = {
+					command: 'path_find',
+					id: '66-oracle-' + key,
+					destination_account: account,
+					send_max: { value: '1', currency: '524C555344000000000000000000000000000000', issuer: 'rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De' },
+					destination_amount: '-1',
+					source_account: account,
+					// flags: 65536,
+					subcommand: 'create'
+				}
+				
+				const path_result = await xrpl.send(command)
+				if ('error' in path_result) { return }
+				path_result.result.time = new Date().getTime()
+				
+				xrpl.on('path', async (path) => {
+					if ('error' in path) { return }
+
+					try {
+						if ('alternatives' in path) {
+							path.time = new Date().getTime()
+							const Price = path.alternatives[0].destination_amount / 1_000_000
+							cex['RLUSD'] = {
+								'XRPL': {
+									f: 'RLUSD',
+									a: 1,
+									p: new decimal(1 / Price).toFixed(10) * 1,
+									e: 'XRPL',
+									t: new Date().getTime(),
+									s: 'socket'
+								}
+							}
+						}
+					} catch(e) {
+						log('error', e)
+					}
+				})
+
+				const hhhmmmm = async () => {
+					console.log('upstream connection closed NoRippleDirect ' + key)
+					memes[key] = undefined
+				}
+				xrpl.on('close', hhhmmmm)
+				xrpl.on('error', (error) => {
+					console.log('error pathing NoRippleDirect ' + key, error)
+					memes[key] = undefined
+				})
+			},
         })
+		this.pathRLUSD()
     }
 }

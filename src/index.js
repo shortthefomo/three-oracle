@@ -2,7 +2,6 @@
 
 const EventEmitter = require('events')
 const axios = require('axios')
-const { XrplClient } = require('xrpl-client')
 const WebSocket = require('ws')
 const WebSocketServer = require('ws').Server
 const decimal = require('decimal.js')
@@ -17,7 +16,6 @@ class service extends EventEmitter {
 		super()
 
 		const wss = new WebSocketServer({ port: process.env.APP_PORT })
-		const ClientConnection = [process.env.APP_XRPL, 'wss://xrplcluster.com', 'wss://xrpl.link', 'wss://s2.ripple.com']
 
 		let timeoutpause
 		let openConnectionInterval
@@ -192,7 +190,7 @@ class service extends EventEmitter {
 				socketFX.onclose = function (event) {
 					self.emit('reconnect-forex')
 				}
-			}
+			},
 		})
 	}
 }
