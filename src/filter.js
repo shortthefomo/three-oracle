@@ -269,12 +269,11 @@ module.exports = class filter extends EventEmitter {
 					try {
 						if ('alternatives' in path) {
 							path.time = new Date().getTime()
-							const Price = path.alternatives[0].destination_amount.value
 							cex['CSC'] = {
 								'XRPL': {
 									f: 'CSC',
 									a: 1,
-									p: new decimal(1 / Price).toFixed(10) * 1,
+									p: path.alternatives[0].destination_amount.value,
 									e: 'XRPL',
 									t: new Date().getTime(),
 									s: 'socket'
@@ -324,12 +323,11 @@ module.exports = class filter extends EventEmitter {
 					try {
 						if ('alternatives' in path) {
 							path.time = new Date().getTime()
-							const Price = path.alternatives[0].destination_amount.value
 							cex['XAH'] = {
 								'XRPL': {
 									f: 'XAH',
 									a: 1,
-									p: new decimal(1 / Price).toFixed(10) * 1,
+									p: path.alternatives[0].destination_amount.value,
 									e: 'XRPL',
 									t: new Date().getTime(),
 									s: 'socket'
