@@ -58,6 +58,7 @@ class service extends EventEmitter {
 				oracle.run(250, 60000)
 
 				oracle.on('oracle', (data) => {
+					// log(data)
 					self.route('oracle', data)
 					let logData = {}
 					data_copy = data

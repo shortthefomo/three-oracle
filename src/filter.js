@@ -233,12 +233,10 @@ module.exports = class filter extends EventEmitter {
 
 				const hhhmmmm = async () => {
 					console.log('upstream connection closed NoRippleDirect ' + key)
-					memes[key] = undefined
 				}
 				xrpl.on('close', hhhmmmm)
 				xrpl.on('error', (error) => {
 					console.log('error pathing NoRippleDirect ' + key, error)
-					memes[key] = undefined
 				})
 			},
 			async pathCSC() {
@@ -287,12 +285,10 @@ module.exports = class filter extends EventEmitter {
 
 				const hhhmmmm = async () => {
 					console.log('upstream connection closed NoRippleDirect ' + key)
-					memes[key] = undefined
 				}
 				xrpl.on('close', hhhmmmm)
 				xrpl.on('error', (error) => {
 					console.log('error pathing NoRippleDirect ' + key, error)
-					memes[key] = undefined
 				})
 			},
 			async pathXAH() {
@@ -341,17 +337,68 @@ module.exports = class filter extends EventEmitter {
 
 				const hhhmmmm = async () => {
 					console.log('upstream connection closed NoRippleDirect ' + key)
-					memes[key] = undefined
 				}
 				xrpl.on('close', hhhmmmm)
 				xrpl.on('error', (error) => {
 					console.log('error pathing NoRippleDirect ' + key, error)
-					memes[key] = undefined
+				})
+			},
+			async pathEVR() {
+				const account = 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8' // USE THE AMM POOL ADDRESS
+				const key = 'EVR'
+
+				const xrpl = new XrplClient(ClientConnection, { tryAllNodes: false })
+				await xrpl.ready()
+
+				const command = {
+					command: 'path_find',
+					id: '99-oracle-' + key,
+					destination_account: account,
+					send_max: '1000000',
+					destination_amount: { value: '-1', currency: 'EVR', issuer: 'ra9g3LAJm9xJu8Awe7oWzR6VXFB1mpFtSe' },
+					source_account: account,
+					// flags: 65536,
+					subcommand: 'create'
+				}
+				
+				const path_result = await xrpl.send(command)
+				if ('error' in path_result) { return }
+				path_result.result.time = new Date().getTime()
+				
+				xrpl.on('path', async (path) => {
+					if ('error' in path) { return }
+
+					try {
+						if ('alternatives' in path) {
+							path.time = new Date().getTime()
+							cex['EVR'] = {
+								'XRPL': {
+									f: 'EVR',
+									a: 1,
+									p: path.alternatives[0].destination_amount.value,
+									e: 'XRPL',
+									t: new Date().getTime(),
+									s: 'socket'
+								}
+							}
+						}
+					} catch(e) {
+						log('error', e)
+					}
+				})
+
+				const hhhmmmm = async () => {
+					console.log('upstream connection closed NoRippleDirect ' + key)
+				}
+				xrpl.on('close', hhhmmmm)
+				xrpl.on('error', (error) => {
+					console.log('error pathing NoRippleDirect ' + key, error)
 				})
 			},
         })
 		this.pathRLUSD()
-		this.pathCSC()
+		this.pathEVR()
 		this.pathXAH()
+		this.pathCSC()
     }
 }
