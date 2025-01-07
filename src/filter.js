@@ -195,7 +195,7 @@ module.exports = class filter extends EventEmitter {
 
 				const command = {
 					command: 'path_find',
-					id: '66-oracle-' + key,
+					id: '99-oracle-' + key,
 					destination_account: account,
 					send_max: { value: '1', currency: '524C555344000000000000000000000000000000', issuer: 'rMxCKbEDwqr76QuheSUMdEGf4B9xJ8m5De' },
 					destination_amount: '-1',
@@ -241,7 +241,119 @@ module.exports = class filter extends EventEmitter {
 					memes[key] = undefined
 				})
 			},
+			async pathCSC() {
+				const account = 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8' // USE THE AMM POOL ADDRESS
+				const key = 'CSC'
+
+				const xrpl = new XrplClient(ClientConnection, { tryAllNodes: false })
+				await xrpl.ready()
+
+				const command = {
+					command: 'path_find',
+					id: '99-oracle-' + key,
+					destination_account: account,
+					send_max: { value: '1', currency: 'USD', issuer: 'rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B' },
+					destination_amount: { value: '-1', currency: 'CSC', issuer: 'rCSCManTZ8ME9EoLrSHHYKW8PPwWMgkwr' },
+					source_account: account,
+					// flags: 65536,
+					subcommand: 'create'
+				}
+				
+				const path_result = await xrpl.send(command)
+				if ('error' in path_result) { return }
+				path_result.result.time = new Date().getTime()
+				
+				xrpl.on('path', async (path) => {
+					if ('error' in path) { return }
+
+					try {
+						if ('alternatives' in path) {
+							path.time = new Date().getTime()
+							const Price = path.alternatives[0].destination_amount.value
+							cex['CSC'] = {
+								'XRPL': {
+									f: 'CSC',
+									a: 1,
+									p: new decimal(1 / Price).toFixed(10) * 1,
+									e: 'XRPL',
+									t: new Date().getTime(),
+									s: 'socket'
+								}
+							}
+						}
+					} catch(e) {
+						log('error', e)
+					}
+				})
+
+				const hhhmmmm = async () => {
+					console.log('upstream connection closed NoRippleDirect ' + key)
+					memes[key] = undefined
+				}
+				xrpl.on('close', hhhmmmm)
+				xrpl.on('error', (error) => {
+					console.log('error pathing NoRippleDirect ' + key, error)
+					memes[key] = undefined
+				})
+			},
+			async pathXAH() {
+				const account = 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8' // USE THE AMM POOL ADDRESS
+				const key = 'XAH'
+
+				const xrpl = new XrplClient(ClientConnection, { tryAllNodes: false })
+				await xrpl.ready()
+
+				const command = {
+					command: 'path_find',
+					id: '99-oracle-' + key,
+					destination_account: account,
+					send_max: { value: '1', currency: 'USD', issuer: 'rvYAfWj5gh67oV6fW32ZzP3Aw4Eubs59B' },
+					destination_amount: { value: '-1', currency: 'XAH', issuer: 'rswh1fvyLqHizBS2awu1vs6QcmwTBd9qiv' },
+					source_account: account,
+					// flags: 65536,
+					subcommand: 'create'
+				}
+				
+				const path_result = await xrpl.send(command)
+				if ('error' in path_result) { return }
+				path_result.result.time = new Date().getTime()
+				
+				xrpl.on('path', async (path) => {
+					if ('error' in path) { return }
+
+					try {
+						if ('alternatives' in path) {
+							path.time = new Date().getTime()
+							const Price = path.alternatives[0].destination_amount.value
+							cex['XAH'] = {
+								'XRPL': {
+									f: 'XAH',
+									a: 1,
+									p: new decimal(1 / Price).toFixed(10) * 1,
+									e: 'XRPL',
+									t: new Date().getTime(),
+									s: 'socket'
+								}
+							}
+						}
+					} catch(e) {
+						log('error', e)
+					}
+				})
+
+				const hhhmmmm = async () => {
+					console.log('upstream connection closed NoRippleDirect ' + key)
+					memes[key] = undefined
+				}
+				xrpl.on('close', hhhmmmm)
+				xrpl.on('error', (error) => {
+					console.log('error pathing NoRippleDirect ' + key, error)
+					memes[key] = undefined
+				})
+			},
         })
 		this.pathRLUSD()
+		this.pathCSC()
+		this.pathXAH()
     }
 }
