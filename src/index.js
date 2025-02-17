@@ -113,19 +113,22 @@ class service extends EventEmitter {
 				})
 			},
 			connect() {
+				
 				const self = this
 				if (ping !== undefined) {
                     clearInterval(ping)
                 }
-				
+				log('hiii', process.env.APP_SOCKET)
 				socket = new WebSocket(process.env.APP_SOCKET)
 				socket.onopen = async function (message) {
                     await self.waitForOpenConnection(socket)
 					clearInterval(openConnectionInterval)
+
                     socket.send(JSON.stringify({
                         op: 'subscribe',
                         channel: 'threexrpl'
                     }))
+					
                     ping = setInterval(function() {
                         socket.send(JSON.stringify({ op: 'ping' }))
                     }, 5_000)
