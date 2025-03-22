@@ -71,6 +71,9 @@ class service extends EventEmitter {
 							}
 							// connected = true
 						}
+						else {
+							self.route('stats', value)
+						}
                     })
 				})
 
@@ -118,7 +121,6 @@ class service extends EventEmitter {
 				if (ping !== undefined) {
                     clearInterval(ping)
                 }
-				log('hiii', process.env.APP_SOCKET)
 				socket = new WebSocket(process.env.APP_SOCKET)
 				socket.onopen = async function (message) {
                     await self.waitForOpenConnection(socket)

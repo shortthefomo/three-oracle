@@ -50,7 +50,7 @@ module.exports = class filter extends EventEmitter {
 						}
 					}
 				})
-				cex_results['STATS'] = {TradeVolume: trade_stats }
+				cex_results['STATS'] = trade_stats
 				
 				timeout = setTimeout(() => {
 					this.emit('oracle', cex_results)
@@ -158,7 +158,7 @@ module.exports = class filter extends EventEmitter {
                     }
 					if ('stats' in data) {
 						let dollarUSLocale = Intl.NumberFormat('en-US')
-						trade_stats = dollarUSLocale.format(new decimal(data.stats.t.s).toFixed(0))
+						trade_stats = data.stats
 					}
 					// log(data)
                 }
