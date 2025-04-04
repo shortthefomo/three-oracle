@@ -213,7 +213,7 @@ module.exports = class filter extends EventEmitter {
 
 					try {
 						if ('alternatives' in path && path.alternatives.length > 0) {
-							log(path.alternatives)
+							// log(path.alternatives)
 							path.time = new Date().getTime()
 							const Price = path.alternatives[0].destination_amount / 1_000_000
 							cex['RLUSD'] = {
