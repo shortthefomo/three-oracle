@@ -149,6 +149,18 @@ class service  {
 							} catch(e) {
 								// do nothing
 							}
+							let coinex
+							try {
+								coinex = await axios.get('https://api.coinex.com/v2/spot/ticker?market=XAHUSDT')
+								values.push({
+									p: coinex.data.data[0].last * 1,
+									e: 'coinex',
+									t: new Date().getTime(),
+									s: 'rest'
+								})
+							} catch(e) {
+								// do nothing
+							}
 							const agg = atm_filter.aggregate(values, 5000)
 	
 							data['USD'] = {
@@ -237,6 +249,17 @@ class service  {
 								s: 'socket'
 							}]
 	 
+							try {
+								const coinex = await axios.get('https://api.coinex.com/v2/spot/ticker?market=EVRUSDT')
+								values.push({
+									p: coinex.data.data[0].last * 1,
+									e: 'coinex',
+									t: new Date().getTime(),
+									s: 'rest'
+								})
+							} catch(e) {
+								// do nothing
+							}
 							try {
 								const bitrue = await axios.get('https://openapi.bitrue.com/api/v1/ticker/bookTicker?symbol=EVRUSDT')
 								values.push({
