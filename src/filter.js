@@ -280,7 +280,6 @@ module.exports = class filter extends EventEmitter {
 									s: 'socket'
 								}
 							}
-							log(cex['USDC'])
 						}
 					} catch(e) {
 						log('error', e)
