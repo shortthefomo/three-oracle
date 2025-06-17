@@ -240,6 +240,61 @@ module.exports = class filter extends EventEmitter {
 					console.log('error pathing NoRippleDirect ' + key, error)
 				})
 			},
+			async pathUSDC() {
+				const account = 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8' // USE THE AMM POOL ADDRESS
+				const key = 'USDC'
+
+				const xrpl = new XrplClient(ClientConnection, { tryAllNodes: false })
+				await xrpl.ready()
+
+				const command = {
+					command: 'path_find',
+					id: '99-oracle-' + key,
+					destination_account: account,
+					send_max: { value: '1', currency: '5553444300000000000000000000000000000000', issuer: 'rGm7WCVp9gb4jZHWTEtGUr4dd74z2XuWhE' },
+					destination_amount: '-1',
+					source_account: account,
+					// flags: 65536,
+					subcommand: 'create'
+				}
+				
+				const path_result = await xrpl.send(command)
+				if ('error' in path_result) { return }
+				path_result.result.time = new Date().getTime()
+				
+				xrpl.on('path', async (path) => {
+					if ('error' in path) { return }
+
+					try {
+						if ('alternatives' in path && path.alternatives.length > 0) {
+							// log(path.alternatives)
+							path.time = new Date().getTime()
+							const Price = path.alternatives[0].destination_amount / 1_000_000
+							cex['USDC'] = {
+								'XRPL': {
+									f: 'USDC',
+									a: 1,
+									p: new decimal(1 / Price).toFixed(10) * 1,
+									e: 'XRPL',
+									t: new Date().getTime(),
+									s: 'socket'
+								}
+							}
+							log(cex['USDC'])
+						}
+					} catch(e) {
+						log('error', e)
+					}
+				})
+
+				const hhhmmmm = async () => {
+					console.log('upstream connection closed NoRippleDirect ' + key)
+				}
+				xrpl.on('close', hhhmmmm)
+				xrpl.on('error', (error) => {
+					console.log('error pathing NoRippleDirect ' + key, error)
+				})
+			},
 			async pathCSC() {
 				const account = 'rThREeXrp54XTQueDowPV1RxmkEAGUmg8' // USE THE AMM POOL ADDRESS
 				const key = 'CSC'
@@ -398,6 +453,7 @@ module.exports = class filter extends EventEmitter {
 			},
         })
 		this.pathRLUSD()
+		this.pathUSDC()
 		this.pathEVR()
 		this.pathXAH()
 		this.pathCSC()
