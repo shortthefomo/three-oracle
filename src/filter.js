@@ -216,15 +216,17 @@ module.exports = class filter extends EventEmitter {
 							// log(path.alternatives)
 							path.time = new Date().getTime()
 							const Price = path.alternatives[0].destination_amount / 1_000_000
-							cex['RLUSD'] = {
-								'XRPL': {
-									f: 'RLUSD',
-									a: 1,
-									p: new decimal(1 / Price).toFixed(10) * 1,
-									e: 'XRPL',
-									t: new Date().getTime(),
-									s: 'socket'
-								}
+							if (cex['RLUSD'] === undefined) {
+								cex['RLUSD'] = {}
+							}
+
+							cex['RLUSD']['XRPL'] = {
+								f: 'RLUSD',
+								a: 1,
+								p: new decimal(1 / Price).toFixed(10) * 1,
+								e: 'XRPL',
+								t: new Date().getTime(),
+								s: 'socket'
 							}
 						}
 					} catch(e) {
@@ -270,15 +272,19 @@ module.exports = class filter extends EventEmitter {
 							// log(path.alternatives)
 							path.time = new Date().getTime()
 							const Price = path.alternatives[0].destination_amount / 1_000_000
-							cex['USDC'] = {
-								'XRPL': {
-									f: 'USDC',
-									a: 1,
-									p: new decimal(1 / Price).toFixed(10) * 1,
-									e: 'XRPL',
-									t: new Date().getTime(),
-									s: 'socket'
-								}
+
+							if (cex['USDC'] === undefined) {
+								cex['USDC'] = {}
+							}
+
+							cex['USDC']['XRPL'] = {
+								f: 'USDC',
+								a: 1,
+								p: new decimal(1 / Price).toFixed(10) * 1,
+								e: 'XRPL',
+								t: new Date().getTime(),
+								s: 'socket'
+							
 							}
 						}
 					} catch(e) {
@@ -322,15 +328,17 @@ module.exports = class filter extends EventEmitter {
 					try {
 						if ('alternatives' in path) {
 							path.time = new Date().getTime()
-							cex['CSC'] = {
-								'XRPL': {
-									f: 'CSC',
-									a: 1,
-									p: path.alternatives[0].destination_amount.value,
-									e: 'XRPL',
-									t: new Date().getTime(),
-									s: 'socket'
-								}
+							if (cex['CSC'] === undefined) {
+								cex['CSC'] = {}
+							}
+
+							cex['CSC']['XRPL'] = {
+								f: 'CSC',
+								a: 1,
+								p: path.alternatives[0].destination_amount.value,
+								e: 'XRPL',
+								t: new Date().getTime(),
+								s: 'socket'
 							}
 						}
 					} catch(e) {
@@ -374,15 +382,18 @@ module.exports = class filter extends EventEmitter {
 					try {
 						if ('alternatives' in path) {
 							path.time = new Date().getTime()
-							cex['XAH'] = {
-								'XRPL': {
-									f: 'XAH',
-									a: 1,
-									p: path.alternatives[0].destination_amount.value,
-									e: 'XRPL',
-									t: new Date().getTime(),
-									s: 'socket'
-								}
+
+							if (cex['XAH'] === undefined) {
+								cex['XAH'] = {}
+							}
+
+							cex['XAH']['XRPL'] = {
+								f: 'XAH',
+								a: 1,
+								p: path.alternatives[0].destination_amount.value,
+								e: 'XRPL',
+								t: new Date().getTime(),
+								s: 'socket'
 							}
 						}
 					} catch(e) {
@@ -426,15 +437,17 @@ module.exports = class filter extends EventEmitter {
 					try {
 						if ('alternatives' in path) {
 							path.time = new Date().getTime()
-							cex['EVR'] = {
-								'XRPL': {
-									f: 'EVR',
-									a: 1,
-									p: path.alternatives[0].destination_amount.value,
-									e: 'XRPL',
-									t: new Date().getTime(),
-									s: 'socket'
-								}
+
+							if (cex['EVR'] === undefined) {
+								cex['EVR'] = {}
+							}
+							cex['EVR']['XRPL'] = {
+								f: 'EVR',
+								a: 1,
+								p: path.alternatives[0].destination_amount.value,
+								e: 'XRPL',
+								t: new Date().getTime(),
+								s: 'socket'
 							}
 						}
 					} catch(e) {
