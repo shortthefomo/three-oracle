@@ -85,7 +85,7 @@ class service extends EventEmitter {
 				this.addListener('memstats', async () => {
 					this.logAppStats()
 					log('data size', Object.keys(data_copy).length)
-					if (Object.keys(data_copy).length <= 5) {
+					if (Object.keys(data_copy).length <= 6) {
 						connected = false
 						log('reconnect no data ---------------->')
 						this.emit('kill-process')
